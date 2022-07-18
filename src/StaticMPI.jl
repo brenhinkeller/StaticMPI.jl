@@ -19,7 +19,7 @@ module StaticMPI
     @inline function MPI_Comm_size(comm::Ptr{Ptr{UInt8}})
         comm_size = Ref(0)
         @symbolcall MPI_Comm_size(comm::Ptr{Ptr{UInt8}}, ⅋(comm_size)::Ptr{Int64})::Int32
-        return world_size[]
+        return comm_size[]
     end
     @inline function MPI_Comm_rank(comm::Ptr{Ptr{UInt8}})
         comm_rank = Ref(0)
