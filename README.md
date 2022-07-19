@@ -3,7 +3,7 @@
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://brenhinkeller.github.io/StaticMPI.jl/dev/)
 [![Build Status](https://github.com/brenhinkeller/StaticMPI.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/brenhinkeller/StaticMPI.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
-A minimal interface for calling MPI from [`StaticCompiler.compile_executable`](https://github.com/tshort/StaticCompiler.jl)'d statically compiled Julia executables.
+A minimal interface for calling [MPI](https://www.mpi-forum.org/) from [`StaticCompiler.compile_executable`](https://github.com/tshort/StaticCompiler.jl)'d statically compiled Julia executables.
 
 For all other purposes, see [MPI.jl](https://github.com/JuliaParallel/MPI.jl) instead.
 
