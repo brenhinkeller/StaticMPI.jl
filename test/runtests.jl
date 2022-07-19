@@ -1,24 +1,55 @@
 using StaticMPI
 using Test
+using OpenMPI_jll, MPICH_jll
 
-using StaticTools, StaticCompiler
-using OpenMPI_jll
 @testset "StaticMPI.jl" begin
+
     if OpenMPI_jll.is_available()
-        function mpihello(argc, argv)
-            MPI_Init(argc, argv)
-
-            comm = mpi_comm_world()
-            world_size, world_rank = MPI_Comm_size(comm), MPI_Comm_rank(comm)
-
-            printf((c"Hello from ", world_rank, c" of ", world_size, c" processors!\n"))
-            MPI_Finalize()
+        status = -1
+        try
+            isfile("mpihello_openmpi") && rm("mpihello_openmpi")
+            status = run(`julia --compile=min ./scripts/mpihello_openmpi.jl`)
+        catch e
+            @warn "Could not compile ./scripts/mpihello_openmpi.jl"
+            println(e)
         end
+        @test isa(status, Base.Process)
+        @test isa(status, Base.Process) && status.exitcode == 0
 
-        compile_executable(mpihello, (Int, Ptr{Ptr{UInt8}}), "./";
-            cflags=`-lmpi -L$(OpenMPI_jll.LIBPATH[])`
-        )
-
-        run(`$(OpenMPI_jll.PATH[])/mpiexec --oversubscribe -mp 4 ./mpihello`)
+        println("mpihello_openmpi:")
+        status = -1
+        try
+            status = run(`$(OpenMPI_jll.PATH[])/mpiexec --oversubscribe -np 4 ./mpihello_openmpi`)
+        catch e
+            @warn "Could not run ./mpihello_openmpi"
+            println(e)
+        end
+        @test isa(status, Base.Process)
+        @test isa(status, Base.Process) && status.exitcode == 0
     end
+
+    if MPICH_jll.is_available()
+        status = -1
+        try
+            isfile("mpihello_mpich") && rm("mpihello_mpich")
+            status = run(`julia --compile=min scripts/mpihello_mpich.jl`)
+        catch e
+            @warn "Could not compile ./scripts/mpihello_mpich.jl"
+            println(e)
+        end
+        @test isa(status, Base.Process)
+        @test isa(status, Base.Process) && status.exitcode == 0
+
+        println("mpihello_mpich:")
+        status = -1
+        try
+            status = run(`$(MPICH_jll.PATH[])/mpiexec -np 4 ./mpihello_mpich`) # --oversubscribe option is not needed with mpich
+        catch e
+            @warn "Could not run ./mpihello_mpich"
+            println(e)
+        end
+        @test isa(status, Base.Process)
+        @test isa(status, Base.Process) && status.exitcode == 0
+    end
+
 end
