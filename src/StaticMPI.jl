@@ -69,14 +69,14 @@ module StaticMPI
     Obtain the number of tasks in the specified MPI communicator `comm`.
     """
     @inline function MPI_Comm_size(comm::Ptr{Ptr{UInt8}}) #OpenMPI
-        comm_size = Ref(0)
-        @symbolcall MPI_Comm_size(comm::Ptr{Ptr{UInt8}}, ⅋(comm_size)::Ptr{Int64})::Int32
-        return comm_size[]
+        _comm_size = Ref(0)
+        @symbolcall MPI_Comm_size(comm::Ptr{Ptr{UInt8}}, ⅋(_comm_size)::Ptr{Int64})::Int32
+        return _comm_size[]
     end
     @inline function MPI_Comm_size(comm::Mpich.MPI_Comm) #MPICH
-        comm_size = Ref(Int32(0))
-        Mpich.MPI_Comm_size(comm, ⅋(comm_size))
-        return comm_size[]
+        _comm_size = Ref(Int32(0))
+        Mpich.MPI_Comm_size(comm, ⅋(_comm_size))
+        return _comm_size[]
     end
     export MPI_Comm_size
 
@@ -88,29 +88,29 @@ module StaticMPI
     communicator `comm`
     """
     @inline function MPI_Comm_rank(comm::Ptr{Ptr{UInt8}}) #OpenMPI
-        comm_rank = Ref(0)
-        @symbolcall MPI_Comm_rank(comm::Ptr{Ptr{UInt8}}, ⅋(comm_rank)::Ptr{Int64})::Int32
-        return comm_rank[]
+        _comm_rank = Ref(0)
+        @symbolcall MPI_Comm_rank(comm::Ptr{Ptr{UInt8}}, ⅋(_comm_rank)::Ptr{Int64})::Int32
+        return _comm_rank[]
     end
     @inline function MPI_Comm_rank(comm::Mpich.MPI_Comm) #MPICH
-        comm_rank = Ref(Int32(0))
-        Mpich.MPI_Comm_rank(comm, ⅋(comm_rank))
-        return comm_rank[]
+        _comm_rank = Ref(Int32(0))
+        Mpich.MPI_Comm_rank(comm, ⅋(_comm_rank))
+        return _comm_rank[]
     end
     export MPI_Comm_rank
 
 
     @inline function MPI_Recv(buffer::AbstractArray{T}, source, tag, comm::Mpich.MPI_Comm) where T
-        status = Mpich.MPI_Status()
-        Mpich.MPI_Recv(Ptr{Nothing}(⅋(buffer)), length(buffer), Mpich.mpitype(T), source, tag, comm, ⅋(status))
-        status
+        _status = Ref(MPI_STATUS_NULL)
+        Mpich.MPI_Recv(Ptr{Nothing}(⅋(buffer)), length(buffer), Mpich.mpitype(T), source, tag, comm, ⅋(_status))
+        _status[]
     end
     export MPI_Recv
 
     @inline function MPI_Irecv(buffer::AbstractArray{T}, source, tag, comm::Mpich.MPI_Comm) where T
-        request = Ref(MPI_REQUEST_NULL)
-        Mpich.MPI_Irecv(Ptr{Nothing}(⅋(buffer)), length(buffer), Mpich.mpitype(T), source, tag, comm, ⅋(request))
-        request[]
+        _request = Ref(MPI_REQUEST_NULL)
+        Mpich.MPI_Irecv(Ptr{Nothing}(⅋(buffer)), length(buffer), Mpich.mpitype(T), source, tag, comm, ⅋(_request))
+        _request[]
     end
     export MPI_Irecv
 
@@ -120,9 +120,9 @@ module StaticMPI
     export MPI_Send
 
     @inline function MPI_Isend(buffer::AbstractArray{T}, dest, tag, comm::Mpich.MPI_Comm) where T
-        request = Ref(MPI_REQUEST_NULL)
-        Mpich.MPI_Isend(Ptr{Nothing}(⅋(buffer)), length(buffer), Mpich.mpitype(T), dest, tag, comm, ⅋(request))
-        request[]
+        _request = Ref(MPI_REQUEST_NULL)
+        Mpich.MPI_Isend(Ptr{Nothing}(⅋(buffer)), length(buffer), Mpich.mpitype(T), dest, tag, comm, ⅋(_request))
+        _request[]
     end
     export MPI_Isend
 
@@ -131,31 +131,24 @@ module StaticMPI
     export MPI_Barrier
 
     @inline function MPI_Wait(request::Mpich.MPI_Request)
-        _request, status = Ref(request), Mpich.MPI_Status()
-        MPI_Wait(⅋(_request), ⅋(status))
-        status
+        _request, _status = Ref(request), Ref(MPI_STATUS_NULL)
+        MPI_Wait(⅋(_request), ⅋(_status))
+        _status[]
     end
     export MPI_Wait
 
-    @inline function MPI_Waitany(requests::AbstractArray{Mpich.MPI_Request}, status::Mpich.MPI_Status=Mpich.MPI_Status())
-        index = Ref(zero(Int32))
-        MPI_Waitany(length(requests), ⅋(requests), ⅋(index), ⅋(status))
-        index[]
+    @inline function MPI_Waitany(requests::AbstractArray{Mpich.MPI_Request}, status=Ref(MPI_STATUS_NULL))
+        _index, _status = Ref(zero(Int32)), status
+        MPI_Waitany(length(requests), ⅋(requests), ⅋(_index), ⅋(_status))
+        _index[]
     end
     export MPI_Waitany
 
-    # @inline function MPI_Waitall(requests::AbstractArray{Mpich.MPI_Request}, status::Mpich.MPI_Status=Mpich.MPI_Status())
-    #     index = Ref(zero(Int32))
-    #     MPI_Waitall(length(requests), ⅋(requests), ⅋(index), ⅋(status))
-    #     index[]
-    # end
-    # export MPI_Waitall
-    #
-    #
-    # @inline MPI_Waitall(count::Int32, array_of_requests::Ptr{MPI_Request}, array_of_statuses::Ptr{MPI_Status}) =
-    #    @symbolcall MPI_Waitall(count::Int32, array_of_requests::Ptr{MPI_Request}, array_of_statuses::Ptr{MPI_Status})::Int32
-    #
-
-
+    @inline function MPI_Waitall(requests::AbstractArray{Mpich.MPI_Request}, statuses=sfill(MPI_STATUS_NULL, length(requests)))
+        _index = Ref(zero(Int32))
+        MPI_Waitall(length(requests), ⅋(requests), ⅋(_index), ⅋(statuses))
+        _index[]
+    end
+    export MPI_Waitall
 
 end # module

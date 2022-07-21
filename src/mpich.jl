@@ -18,7 +18,7 @@ MPI_UINT8_T, MPI_UINT16_T, MPI_UINT32_T, MPI_UINT64_T, MPI_C_BOOL, MPI_C_FLOAT_C
 MPI_C_COMPLEX, MPI_C_DOUBLE_COMPLEX, MPI_C_LONG_DOUBLE_COMPLEX, MPIX_C_FLOAT16,
 MPI_AINT, MPI_OFFSET, MPI_COUNT, MPI_OP_NULL, MPI_MAX, MPI_MIN, MPI_SUM, MPI_PROD,
 MPI_LAND, MPI_BAND, MPI_LOR, MPI_BOR, MPI_LXOR, MPI_BXOR, MPI_MINLOC, MPI_MAXLOC,
-MPI_REPLACE, MPI_NO_OP
+MPI_REPLACE, MPI_NO_OP, MPI_STATUS_NULL
 
 # Codes
 export MPI_THREAD_SINGLE, MPI_THREAD_FUNNELED, MPI_THREAD_SERIALIZED,
@@ -34,15 +34,14 @@ MPI_SUCCESS
 abstract type AbstractMpichType end
 
 # MPI_Status struct:
-mutable struct MPI_Status <: AbstractMpichType
+struct MPI_Status <: AbstractMpichType
     count_lo::Int32
     count_hi_and_cancelled::Int32
     MPI_SOURCE::Int32
     MPI_TAG::Int32
     MPI_ERROR::Int32
 end
-MPI_Status() = MPI_Status(zero(Int32),zero(Int32),zero(Int32),zero(Int32),zero(Int32))
-@inline Base.pointer(x::MPI_Status) = Ptr{MPI_Status}(pointer_from_objref(x))
+MPI_STATUS_NULL = MPI_Status(zero(Int32),zero(Int32),zero(Int32),zero(Int32),zero(Int32))
 
 # Communicators:
 struct MPI_Comm <: AbstractMpichType
