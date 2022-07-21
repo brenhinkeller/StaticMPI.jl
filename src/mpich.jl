@@ -4,6 +4,7 @@
 module Mpich
 using StaticTools
 
+
 export MPI_COMM_NULL, MPI_COMM_WORLD, MPI_COMM_SELF, MPI_GROUP_NULL, MPI_GROUP_EMPTY,
 MPI_WIN_NULL, MPI_FILE_NULL, MPI_REQUEST_NULL, MPI_MESSAGE_NULL, MPI_MESSAGE_NO_PROC,
 MPI_DATATYPE_NULL, MPI_CHAR, MPI_SIGNED_CHAR, MPI_UNSIGNED_CHAR, MPI_BYTE, MPI_WCHAR,
@@ -19,9 +20,21 @@ MPI_AINT, MPI_OFFSET, MPI_COUNT, MPI_OP_NULL, MPI_MAX, MPI_MIN, MPI_SUM, MPI_PRO
 MPI_LAND, MPI_BAND, MPI_LOR, MPI_BOR, MPI_LXOR, MPI_BXOR, MPI_MINLOC, MPI_MAXLOC,
 MPI_REPLACE, MPI_NO_OP
 
+# Codes
+export MPI_THREAD_SINGLE, MPI_THREAD_FUNNELED, MPI_THREAD_SERIALIZED,
+MPI_THREAD_MULTIPLE, MPI_IDENT, MPI_CONGRUENT, MPI_SIMILAR, MPI_UNEQUAL,
+MPIX_GPU_SUPPORT_CUDA, MPIX_GPU_SUPPORT_ZE, MPIX_GPU_SUPPORT_HIP,
+MPI_SUCCESS
+
+# Types
+# export MPI_Status, MPI_Comm, MPI_Group, MPI_Win, MPI_Win, MPI_File, MPI_Request,
+# MPI_Message, MPI_Datatype, MPI_Op, MPI_Errhandler, MPI_Info, MPI_Aint, MPI_Fint,
+# MPI_Count
+
+abstract type AbstractMpichType end
 
 # MPI_Status struct:
-mutable struct MPI_Status
+mutable struct MPI_Status <: AbstractMpichType
     count_lo::Int32
     count_hi_and_cancelled::Int32
     MPI_SOURCE::Int32
@@ -31,7 +44,7 @@ end
 @inline Base.pointer(x::MPI_Status) = Ptr{MPI_Status}(pointer_from_objref(x))
 
 # Communicators:
-struct MPI_Comm
+struct MPI_Comm <: AbstractMpichType
    x::UInt32
 end
 const MPI_COMM_NULL  = MPI_Comm(0x04000000)
@@ -39,39 +52,39 @@ const MPI_COMM_WORLD = MPI_Comm(0x44000000)
 const MPI_COMM_SELF  = MPI_Comm(0x44000001)
 
 # Groups:
-struct MPI_Group
+struct MPI_Group <: AbstractMpichType
    x::UInt32
 end
 const MPI_GROUP_NULL  = MPI_Group(0x08000000)
 const MPI_GROUP_EMPTY = MPI_Group(0x48000000)
 
 # RMA and Windows:
-struct MPI_Win
+struct MPI_Win <: AbstractMpichType
    x::UInt32
 end
 const MPI_WIN_NULL = MPI_Win(0x20000000)
 
 # File and IO:
-struct MPI_File
+struct MPI_File <: AbstractMpichType
    x::Ptr{UInt8}
 end
 const MPI_FILE_NULL = MPI_File(0)
 
 # MPI request objects:
-struct MPI_Request
+struct MPI_Request <: AbstractMpichType
    x::UInt32
 end
 const MPI_REQUEST_NULL   = MPI_Request(0x2c000000)
 
 # MPI message objects for Mprobe and related functions:
-struct MPI_Message
+struct MPI_Message <: AbstractMpichType
    x::UInt32
 end
 const MPI_MESSAGE_NULL    = MPI_Message(0x2c000000)
 const MPI_MESSAGE_NO_PROC = MPI_Message(0x6c000000)
 
 # Data types:
-struct MPI_Datatype
+struct MPI_Datatype <: AbstractMpichType
    x::UInt32
 end
 const MPI_DATATYPE_NULL  = MPI_Datatype(0x0c000000)
@@ -135,7 +148,7 @@ const MPI_OFFSET        = MPI_Datatype(0x4c000844)
 const MPI_COUNT         = MPI_Datatype(0x4c000845)
 
 # Collective operations:
-struct MPI_Op
+struct MPI_Op <: AbstractMpichType
    x::UInt32
 end
 const MPI_OP_NULL = MPI_Op(0x18000000)
@@ -155,7 +168,7 @@ const MPI_REPLACE = MPI_Op(0x5800000d)
 const MPI_NO_OP   = MPI_Op(0x5800000e)
 
 # Built-in error handler objects:
-struct MPI_Errhandler
+struct MPI_Errhandler <: AbstractMpichType
    x::UInt32
 end
 const MPI_ERRHANDLER_NULL = MPI_Errhandler(0x14000000)
@@ -164,7 +177,7 @@ const MPI_ERRORS_RETURN    = MPI_Errhandler(0x54000001)
 const MPIR_ERRORS_THROW_EXCEPTIONS = MPI_Errhandler(0x54000002)
 
 # Info
-struct MPI_Info
+struct MPI_Info <: AbstractMpichType
    x::UInt32
 end
 const MPI_INFO_NULL        = MPI_Info(0x1c000000)
@@ -173,13 +186,13 @@ const MPI_MAX_INFO_KEY     =  255
 const MPI_MAX_INFO_VAL     = 1024
 
 # Other types
-struct MPI_Aint
+struct MPI_Aint <: AbstractMpichType
    x::UInt32
 end
-struct MPI_Fint
+struct MPI_Fint <: AbstractMpichType
    x::UInt32
 end
-struct MPI_Count
+struct MPI_Count <: AbstractMpichType
    x::Int64
 end
 
@@ -237,7 +250,7 @@ const MPI_ERR_REQUEST     = 19      #= Invalid mpi_request handle =#
 
 
 # Functions
-@inline MPI_Init(argc::Ptr{Int32}, argv::Ptr{Ptr{Ptr{UInt8}}}) = @symbolcall MPI_Init(argc::Ptr{Int32}, argv::Ptr{Ptr{Ptr{UInt8}}})::Int32
+@inline MPI_Init(argc::Ptr{Int}, argv::Ptr{Ptr{Ptr{UInt8}}}) = @symbolcall MPI_Init(argc::Ptr{Int}, argv::Ptr{Ptr{Ptr{UInt8}}})::Int32
 @inline MPI_Finalize() = @symbolcall MPI_Finalize()::Int32
 @inline MPI_Initialized(flag::Ptr{Int32}) = @symbolcall MPI_Initialized(flag::Ptr{Int32})::Int32
 @inline MPI_Abort(comm::MPI_Comm, errorcode::Int32) = @symbolcall MPI_Abort(comm.x::UInt32, errorcode::Int32)::Int32

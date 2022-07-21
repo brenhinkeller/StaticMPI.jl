@@ -4,7 +4,7 @@ libpath = joinpath(first(splitdir(OpenMPI_jll.PATH[])), "lib")
 function mpihello_openmpi(argc, argv)
     MPI_Init(argc, argv)
 
-    comm = mpi_comm_world(OpenMPI)
+    comm = mpi_comm_world(:OpenMPI)
     world_size, world_rank = MPI_Comm_size(comm), MPI_Comm_rank(comm)
 
     printf((c"Hello from ", world_rank, c" of ", world_size, c" processors!\n"))
