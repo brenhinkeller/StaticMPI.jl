@@ -1,5 +1,5 @@
 #=
-   MPICH frontend
+   Interface to MPICH libmpi implemented by direct `llvmcall`
 =#
 module Mpich
 using StaticTools
@@ -41,6 +41,7 @@ mutable struct MPI_Status <: AbstractMpichType
     MPI_TAG::Int32
     MPI_ERROR::Int32
 end
+MPI_Status() = MPI_Status(zero(Int32),zero(Int32),zero(Int32),zero(Int32),zero(Int32))
 @inline Base.pointer(x::MPI_Status) = Ptr{MPI_Status}(pointer_from_objref(x))
 
 # Communicators:
@@ -248,6 +249,20 @@ const MPI_ERR_IN_STATUS   = 17      #= Look in status for error value =#
 const MPI_ERR_PENDING     = 18      #= Pending request =#
 const MPI_ERR_REQUEST     = 19      #= Invalid mpi_request handle =#
 
+# Convert Julia types to equivalent MPI types
+# Can extend for custom datatypes
+mpitype(::Type{Bool}) = MPI_C_BOOL
+mpitype(::Type{Int8}) = MPI_INT8_T
+mpitype(::Type{UInt8}) = MPI_UINT8_T
+mpitype(::Type{Int16}) = MPI_INT16_T
+mpitype(::Type{UInt16}) = MPI_UINT16_T
+mpitype(::Type{Int32}) = MPI_INT32_T
+mpitype(::Type{UInt32}) = MPI_UINT32_T
+mpitype(::Type{Int64}) = MPI_INT64_T
+mpitype(::Type{UInt64}) = MPI_UINT64_T
+mpitype(::Type{Float16}) = MPI_UINT16_T
+mpitype(::Type{Float32}) = MPI_FLOAT
+mpitype(::Type{Float64}) = MPI_DOUBLE
 
 # Functions
 @inline MPI_Init(argc::Ptr{Int}, argv::Ptr{Ptr{Ptr{UInt8}}}) = @symbolcall MPI_Init(argc::Ptr{Int}, argv::Ptr{Ptr{Ptr{UInt8}}})::Int32

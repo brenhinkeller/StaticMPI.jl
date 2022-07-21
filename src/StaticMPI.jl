@@ -2,13 +2,9 @@ module StaticMPI
 
     using StaticTools
 
-    export MPI_Init, MPI_Finalize
-    export mpi_comm_world
-    export MPI_Comm_size, MPI_Comm_rank
-    export MPICH, OpenMPI
-
     struct MPICH end
     struct OpenMPI end
+    export MPICH, OpenMPI
 
     include("mpich.jl")
     export Mpich
@@ -41,6 +37,7 @@ module StaticMPI
         c,v = Ref(argc), Ref(argv)
         Mpich.MPI_Init(⅋(c), ⅋(v))
     end
+    export MPI_Init
 
     """
     ```julia
@@ -49,6 +46,7 @@ module StaticMPI
     Conclude the execution of the calling mpi task.
     """
     @inline MPI_Finalize() = Mpich.MPI_Finalize()
+    export MPI_Finalize
 
     """
     ```julia
@@ -62,6 +60,7 @@ module StaticMPI
     @inline mpi_comm_world(x::Symbol) = Val(x)
     @inline mpi_comm_world(::Val{:MPICH}) = MPI_COMM_WORLD
     @inline mpi_comm_world(::Val{:OpenMPI}) = @externptr ompi_mpi_comm_world::Ptr{UInt8}
+    export mpi_comm_world
 
     """
     ```julia
@@ -79,6 +78,7 @@ module StaticMPI
         Mpich.MPI_Comm_size(comm, ⅋(comm_size))
         return comm_size[]
     end
+    export MPI_Comm_size
 
     """
     ```julia
@@ -97,5 +97,34 @@ module StaticMPI
         Mpich.MPI_Comm_rank(comm, ⅋(comm_rank))
         return comm_rank[]
     end
+    export MPI_Comm_rank
 
-end
+    @inline function MPI_Recv(buffer::AbstractArray{T}, source, tag, comm::Mpich.MPI_Comm) where T
+        status = Mpich.MPI_Status()
+        Mpich.MPI_Recv(Ptr{Nothing}(⅋(buffer)), length(buffer), Mpich.mpitype(T), source, tag, comm, ⅋(status))
+        status
+    end
+    export MPI_Recv
+
+    @inline function MPI_Irecv(buffer::AbstractArray{T}, source, tag, comm::Mpich.MPI_Comm) where T
+        request = Ref(MPI_REQUEST_NULL)
+        Mpich.MPI_Irecv(Ptr{Nothing}(⅋(buffer)), length(buffer), Mpich.mpitype(T), source, tag, comm, ⅋(request))
+        request[]
+    end
+    export MPI_Irecv
+
+    @inline function MPI_Send(buffer::AbstractArray{T}, dest, tag, comm::Mpich.MPI_Comm) where T
+        Mpich.MPI_Send(Ptr{Nothing}(⅋(buffer)), length(buffer), Mpich.mpitype(T), dest, tag, comm)
+    end
+    export MPI_Send
+    @inline function MPI_Isend(buffer::AbstractArray{T}, dest, tag, comm::Mpich.MPI_Comm) where T
+        request = Ref(MPI_REQUEST_NULL)
+        Mpich.MPI_Isend(Ptr{Nothing}(⅋(buffer)), length(buffer), Mpich.mpitype(T), dest, tag, comm, ⅋(request))
+        request[]
+    end
+    export MPI_Isend
+
+
+
+
+end # module
