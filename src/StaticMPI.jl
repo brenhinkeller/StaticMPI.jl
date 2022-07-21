@@ -99,6 +99,7 @@ module StaticMPI
     end
     export MPI_Comm_rank
 
+
     @inline function MPI_Recv(buffer::AbstractArray{T}, source, tag, comm::Mpich.MPI_Comm) where T
         status = Mpich.MPI_Status()
         Mpich.MPI_Recv(Ptr{Nothing}(⅋(buffer)), length(buffer), Mpich.mpitype(T), source, tag, comm, ⅋(status))
@@ -117,6 +118,7 @@ module StaticMPI
         Mpich.MPI_Send(Ptr{Nothing}(⅋(buffer)), length(buffer), Mpich.mpitype(T), dest, tag, comm)
     end
     export MPI_Send
+
     @inline function MPI_Isend(buffer::AbstractArray{T}, dest, tag, comm::Mpich.MPI_Comm) where T
         request = Ref(MPI_REQUEST_NULL)
         Mpich.MPI_Isend(Ptr{Nothing}(⅋(buffer)), length(buffer), Mpich.mpitype(T), dest, tag, comm, ⅋(request))
@@ -124,6 +126,35 @@ module StaticMPI
     end
     export MPI_Isend
 
+
+    @inline MPI_Barrier(comm::Mpich.MPI_Comm) = Mpich.MPI_Barrier(comm::Mpich.MPI_Comm)
+    export MPI_Barrier
+
+    @inline function MPI_Wait(request::Mpich.MPI_Request)
+        _request, status = Ref(request), Mpich.MPI_Status()
+        MPI_Wait(⅋(_request), ⅋(status))
+        status
+    end
+    export MPI_Wait
+
+    @inline function MPI_Waitany(requests::AbstractArray{Mpich.MPI_Request}, status::Mpich.MPI_Status=Mpich.MPI_Status())
+        index = Ref(zero(Int32))
+        MPI_Waitany(length(requests), ⅋(requests), ⅋(index), ⅋(status))
+        index[]
+    end
+    export MPI_Waitany
+
+    # @inline function MPI_Waitall(requests::AbstractArray{Mpich.MPI_Request}, status::Mpich.MPI_Status=Mpich.MPI_Status())
+    #     index = Ref(zero(Int32))
+    #     MPI_Waitall(length(requests), ⅋(requests), ⅋(index), ⅋(status))
+    #     index[]
+    # end
+    # export MPI_Waitall
+    #
+    #
+    # @inline MPI_Waitall(count::Int32, array_of_requests::Ptr{MPI_Request}, array_of_statuses::Ptr{MPI_Status}) =
+    #    @symbolcall MPI_Waitall(count::Int32, array_of_requests::Ptr{MPI_Request}, array_of_statuses::Ptr{MPI_Status})::Int32
+    #
 
 
 
