@@ -10,6 +10,9 @@ module StaticMPI
     struct MPICH end
     struct OpenMPI end
 
+    include("mpich.jl")
+    export mpich
+
     """
     ```julia
     MPI_Init()

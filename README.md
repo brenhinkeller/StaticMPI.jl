@@ -11,8 +11,8 @@ For all other purposes, see [MPI.jl](https://github.com/JuliaParallel/MPI.jl) in
 
 Note that the functions herein insert LLVM IR that directly calls functions from libmpi.
 As such, they will only work when linked against a valid libmpi during compilation.
-For example, they will generally not work interactively in the REPL.
-If they are called without linking to libmpi, expect segfaults!
+For example, they will generally **not** work interactively in the REPL.
+If they are called *without* linking to libmpi, expect segfaults!
 
 Both [OpenMPI](https://www.open-mpi.org/) and [MPICH](https://www.mpich.org/) are
 supported, though as they internally implement MPI communicators slightly
