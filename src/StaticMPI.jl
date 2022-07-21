@@ -2,10 +2,6 @@ module StaticMPI
 
     using StaticTools
 
-    struct MPICH end
-    struct OpenMPI end
-    export MPICH, OpenMPI
-
     include("mpich.jl")
     export Mpich
     using .Mpich
