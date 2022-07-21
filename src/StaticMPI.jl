@@ -3,7 +3,7 @@ module StaticMPI
     using StaticTools
 
     export MPI_Init, MPI_Finalize
-    export MPI_COMM_WORLD, mpi_comm_world
+    export mpi_comm_world
     export MPI_Comm_size, MPI_Comm_rank
     export MPICH, OpenMPI
 
@@ -11,7 +11,8 @@ module StaticMPI
     struct OpenMPI end
 
     include("mpich.jl")
-    export mpich
+    export Mpich
+    export Mpich.MPI_COMM_WORLD
 
     """
     ```julia

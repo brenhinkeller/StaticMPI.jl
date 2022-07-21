@@ -1,7 +1,7 @@
 #=
    MPICH frontend
 =#
-module mpich
+module Mpich
 using StaticTools
 
 # MPI_Status struct:
