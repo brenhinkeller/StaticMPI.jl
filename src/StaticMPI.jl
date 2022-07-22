@@ -159,15 +159,11 @@ module StaticMPI
 
     @inline function MPI_Waitall(requests::Buffer{Mpich.MPI_Request})
         statuses = mfill(MPI_STATUS_NULL, length(requests))
-        _index = Base.RefValue(zero(Int32))
-        MPI_Waitall(length(requests), ⅋(requests), ⅋(_index), ⅋(statuses))
-        free(statuses)
-        _index[]::Int32
+        MPI_Waitall(length(requests), ⅋(requests), ⅋(statuses))
+        free(statuses)::Int32
     end
     @inline function MPI_Waitall(requests::Buffer{Mpich.MPI_Request}, statuses)
-        _index = Base.RefValue(zero(Int32))
-        MPI_Waitall(length(requests), ⅋(requests), ⅋(_index), ⅋(statuses))
-        _index[]::Int32
+        MPI_Waitall(length(requests), ⅋(requests), ⅋(statuses))::Int32
     end
     export MPI_Waitall
 
