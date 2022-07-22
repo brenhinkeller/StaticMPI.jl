@@ -259,9 +259,9 @@ mpitype(::Type{Int32}) = MPI_INT32_T
 mpitype(::Type{UInt32}) = MPI_UINT32_T
 mpitype(::Type{Int64}) = MPI_INT64_T
 mpitype(::Type{UInt64}) = MPI_UINT64_T
-mpitype(::Type{Float16}) = MPI_UINT16_T
-mpitype(::Type{Float32}) = MPI_FLOAT
-mpitype(::Type{Float64}) = MPI_DOUBLE
+mpitype(::Type{Float16}) = MPI_FLOAT
+mpitype(::Type{Float32}) = MPI_DOUBLE
+mpitype(::Type{Float64}) = MPI_LONG_DOUBLE
 
 # Functions
 @inline MPI_Init(argc::Ptr{Int}, argv::Ptr{Ptr{Ptr{UInt8}}}) = @symbolcall MPI_Init(argc::Ptr{Int}, argv::Ptr{Ptr{Ptr{UInt8}}})::Int32

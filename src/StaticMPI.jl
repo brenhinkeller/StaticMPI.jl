@@ -163,7 +163,8 @@ module StaticMPI
         free(statuses)::Int32
     end
     @inline function MPI_Waitall(requests::Buffer{Mpich.MPI_Request}, statuses::Buffer{Mpich.MPI_Request})
-        Mpich.MPI_Waitall(length(requests)%Int32, ⅋(requests), ⅋(statuses))::Int32
+        count = length(requests)%Int32
+        Mpich.MPI_Waitall(count, ⅋(requests), ⅋(statuses))::Int32
     end
     export MPI_Waitall
 
