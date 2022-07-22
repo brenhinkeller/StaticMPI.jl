@@ -30,7 +30,11 @@ module StaticMPI
 
     Returns `MPI_SUCCESS` on success
     """
-    @inline function MPI_Init(argc::Int=0, argv::Ptr{Ptr{UInt8}}=Ptr{Ptr{UInt8}}(C_NULL))
+    @inline function MPI_Init()
+        c,v = Ref(0), Ref(C_NULL)
+        Mpich.MPI_Init(⅋(c), ⅋(v))
+    end
+    @inline function MPI_Init(argc::Int, argv::Ptr{Ptr{UInt8}})
         c,v = Ref(argc), Ref(argv)
         Mpich.MPI_Init(⅋(c), ⅋(v))
     end
