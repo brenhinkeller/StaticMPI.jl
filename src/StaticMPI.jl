@@ -29,11 +29,11 @@ module StaticMPI
     Returns `MPI_SUCCESS` on success
     """
     @inline function MPI_Init()
-        c,v = Ref(0), Ref(C_NULL)
+        c,v = Base.RefValue(0), Base.RefValue(C_NULL)
         Mpich.MPI_Init(⅋(c), ⅋(v))::Int
     end
     @inline function MPI_Init(argc::Int, argv::Ptr{Ptr{UInt8}})
-        c,v = Ref(argc), Ref(argv)
+        c,v = Base.RefValue(argc), Base.RefValue(argv)
         Mpich.MPI_Init(⅋(c), ⅋(v))::Int32
     end
     export MPI_Init
@@ -68,12 +68,12 @@ module StaticMPI
     Obtain the number of tasks in the specified MPI communicator `comm`.
     """
     # @inline function MPI_Comm_size(comm::Ptr{Ptr{UInt8}}) #OpenMPI
-    #     _comm_size = Ref(0)
+    #     _comm_size = Base.RefValue(0)
     #     @symbolcall MPI_Comm_size(comm::Ptr{Ptr{UInt8}}, ⅋(_comm_size)::Ptr{Int64})::Int32
     #     return _comm_size[]::Int
     # end
     @inline function MPI_Comm_size(comm::Mpich.MPI_Comm) #MPICH
-        _comm_size = Ref(Int32(0))
+        _comm_size = Base.RefValue(Int32(0))
         Mpich.MPI_Comm_size(comm, ⅋(_comm_size))
         return _comm_size[]::Int32
     end
@@ -87,12 +87,12 @@ module StaticMPI
     communicator `comm`
     """
     # @inline function MPI_Comm_rank(comm::Ptr{Ptr{UInt8}}) #OpenMPI
-    #     _comm_rank = Ref(0)
+    #     _comm_rank = Base.RefValue(0)
     #     @symbolcall MPI_Comm_rank(comm::Ptr{Ptr{UInt8}}, ⅋(_comm_rank)::Ptr{Int64})::Int32
     #     return _comm_rank[]::Int
     # end
     @inline function MPI_Comm_rank(comm::Mpich.MPI_Comm) #MPICH
-        _comm_rank = Ref(Int32(0))
+        _comm_rank = Base.RefValue(Int32(0))
         Mpich.MPI_Comm_rank(comm, ⅋(_comm_rank))
         return _comm_rank[]::Int32
     end
@@ -100,7 +100,7 @@ module StaticMPI
 
 
     @inline function MPI_Recv(buffer::Buffer{T}, source, tag, comm::Mpich.MPI_Comm) where T
-        _status = Ref(MPI_STATUS_NULL)
+        _status = Base.RefValue(MPI_STATUS_NULL)
         bufptr = Ptr{Nothing}(⅋(buffer))
         Mpich.MPI_Recv(bufptr, length(buffer), Mpich.mpitype(T), source, tag, comm, ⅋(_status))
         _status[]::Mpich.MPI_Status
@@ -108,7 +108,7 @@ module StaticMPI
     export MPI_Recv
 
     @inline function MPI_Irecv(buffer::Buffer{T}, source, tag, comm::Mpich.MPI_Comm) where T
-        _request = Ref(MPI_REQUEST_NULL)
+        _request = Base.RefValue(MPI_REQUEST_NULL)
         bufptr = Ptr{Nothing}(⅋(buffer))
         Mpich.MPI_Irecv(bufptr, length(buffer), Mpich.mpitype(T), source, tag, comm, ⅋(_request))::Int32
     end
@@ -125,7 +125,7 @@ module StaticMPI
     export MPI_Send
 
     @inline function MPI_Isend(buffer::Buffer{T}, dest, tag, comm::Mpich.MPI_Comm) where T
-        _request = Ref(MPI_REQUEST_NULL)
+        _request = Base.RefValue(MPI_REQUEST_NULL)
         bufptr = Ptr{Nothing}(⅋(buffer))
         Mpich.MPI_Isend(bufptr, length(buffer), Mpich.mpitype(T), dest, tag, comm, ⅋(_request))::Int32
     end
@@ -139,19 +139,19 @@ module StaticMPI
     export MPI_Barrier
 
     @inline function MPI_Wait(request::Mpich.MPI_Request)
-        _request, _status = Ref(request), Ref(MPI_STATUS_NULL)
+        _request, _status = Base.RefValue(request), Base.RefValue(MPI_STATUS_NULL)
         MPI_Wait(⅋(_request), ⅋(_status))
         _status[]::Mpich.MPI_Status
     end
     export MPI_Wait
 
     @inline function MPI_Waitany(requests::Buffer{Mpich.MPI_Request})
-        _index, _status = Ref(zero(Int32)), Ref(MPI_STATUS_NULL)
+        _index, _status = Base.RefValue(zero(Int32)), Base.RefValue(MPI_STATUS_NULL)
         MPI_Waitany(length(requests), ⅋(requests), ⅋(_index), ⅋(_status))
         _index[]::Int32
     end
     @inline function MPI_Waitany(requests::Buffer{Mpich.MPI_Request}, status)
-        _index = Ref(zero(Int32))
+        _index = Base.RefValue(zero(Int32))
         MPI_Waitany(length(requests), ⅋(requests), ⅋(_index), ⅋(status))
         _index[]::Int32
     end
@@ -159,13 +159,13 @@ module StaticMPI
 
     @inline function MPI_Waitall(requests::Buffer{Mpich.MPI_Request})
         statuses = mfill(MPI_STATUS_NULL, length(requests))
-        _index = Ref(zero(Int32))
+        _index = Base.RefValue(zero(Int32))
         MPI_Waitall(length(requests), ⅋(requests), ⅋(_index), ⅋(statuses))
         free(statuses)
         _index[]::Int32
     end
     @inline function MPI_Waitall(requests::Buffer{Mpich.MPI_Request}, statuses)
-        _index = Ref(zero(Int32))
+        _index = Base.RefValue(zero(Int32))
         MPI_Waitall(length(requests), ⅋(requests), ⅋(_index), ⅋(statuses))
         _index[]::Int32
     end
