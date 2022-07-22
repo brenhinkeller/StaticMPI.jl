@@ -40,7 +40,8 @@ struct MPI_Status <: AbstractMpichType
     MPI_TAG::Int32
     MPI_ERROR::Int32
 end
-MPI_STATUS_NULL = MPI_Status(zero(Int32),zero(Int32),zero(Int32),zero(Int32),zero(Int32))
+@inline MPI_Status() = MPI_Status(zero(Int32),zero(Int32),zero(Int32),zero(Int32),zero(Int32))
+const MPI_STATUS_NULL = MPI_Status()
 
 # Communicators:
 struct MPI_Comm <: AbstractMpichType
