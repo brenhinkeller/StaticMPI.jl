@@ -2,7 +2,8 @@ using StaticCompiler, StaticTools, StaticMPI, MPICH_jll
 libpath = joinpath(first(splitdir(MPICH_jll.PATH[])), "lib")
 
 function mpisendrecv(argc, argv)
-    MPI_Init(argc, argv)
+ 	status = MPI_Init(argc, argv)
+	(status == MPI_SUCCESS) || error("MPI failed to initialize")
 
     comm = MPI_COMM_WORLD
     world_size, world_rank = MPI_Comm_size(comm), MPI_Comm_rank(comm)
@@ -21,12 +22,13 @@ function mpisendrecv(argc, argv)
     else
 		rng = BoxMuller(world_rank % Int64)
 		x = randn(rng)
-		MPI_Isend(Ref(x), dest, tag, comm)
+		MPI_Isend(Ref(x), 0, 0, comm)
 		printf((c"rank ", world_rank, c", generated, ", x, c"\n"))
     end
     MPI_Finalize()
 end
 
+## ---
 compile_executable(mpisendrecv, (Int, Ptr{Ptr{UInt8}}), "./";
     cflags=`-lmpi -L$libpath -Wl,-rpath,$libpath`
 )
