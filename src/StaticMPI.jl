@@ -47,19 +47,19 @@ module StaticMPI
     @inline MPI_Finalize() = Mpich.MPI_Finalize()::Int32
     export MPI_Finalize
 
-    """
-    ```julia
-    mpi_comm_world(implementation=OpenMPI())
-    ```
-    Obtain an MPI communicator that includes all available MPI tasks. Since the
-    format of MPI communicators is implementation-dependent, you should specify
-    which MPI implementation you are using (either `:MPICH` or `:OpenMPI`)
-    """
-    @inline mpi_comm_world() = MPI_COMM_WORLD
-    @inline mpi_comm_world(x::Symbol) = Val(x)
-    @inline mpi_comm_world(::Val{:MPICH}) = MPI_COMM_WORLD
-    @inline mpi_comm_world(::Val{:OpenMPI}) = @externptr ompi_mpi_comm_world::Ptr{UInt8}
-    export mpi_comm_world
+    # """
+    # ```julia
+    # mpi_comm_world(implementation=OpenMPI())
+    # ```
+    # Obtain an MPI communicator that includes all available MPI tasks. Since the
+    # format of MPI communicators is implementation-dependent, you should specify
+    # which MPI implementation you are using (either `:MPICH` or `:OpenMPI`)
+    # """
+    # @inline mpi_comm_world() = MPI_COMM_WORLD
+    # @inline mpi_comm_world(x::Symbol) = Val(x)
+    # @inline mpi_comm_world(::Val{:MPICH}) = MPI_COMM_WORLD
+    # @inline mpi_comm_world(::Val{:OpenMPI}) = @externptr ompi_mpi_comm_world::Ptr{UInt8}
+    # export mpi_comm_world
 
     """
     ```julia
@@ -67,11 +67,11 @@ module StaticMPI
     ```
     Obtain the number of tasks in the specified MPI communicator `comm`.
     """
-    @inline function MPI_Comm_size(comm::Ptr{Ptr{UInt8}}) #OpenMPI
-        _comm_size = Ref(0)
-        @symbolcall MPI_Comm_size(comm::Ptr{Ptr{UInt8}}, ⅋(_comm_size)::Ptr{Int64})::Int32
-        return _comm_size[]::Int
-    end
+    # @inline function MPI_Comm_size(comm::Ptr{Ptr{UInt8}}) #OpenMPI
+    #     _comm_size = Ref(0)
+    #     @symbolcall MPI_Comm_size(comm::Ptr{Ptr{UInt8}}, ⅋(_comm_size)::Ptr{Int64})::Int32
+    #     return _comm_size[]::Int
+    # end
     @inline function MPI_Comm_size(comm::Mpich.MPI_Comm) #MPICH
         _comm_size = Ref(Int32(0))
         Mpich.MPI_Comm_size(comm, ⅋(_comm_size))
@@ -86,11 +86,11 @@ module StaticMPI
     Obtain the rank of the calling MPI task within the specified MPI
     communicator `comm`
     """
-    @inline function MPI_Comm_rank(comm::Ptr{Ptr{UInt8}}) #OpenMPI
-        _comm_rank = Ref(0)
-        @symbolcall MPI_Comm_rank(comm::Ptr{Ptr{UInt8}}, ⅋(_comm_rank)::Ptr{Int64})::Int32
-        return _comm_rank[]::Int
-    end
+    # @inline function MPI_Comm_rank(comm::Ptr{Ptr{UInt8}}) #OpenMPI
+    #     _comm_rank = Ref(0)
+    #     @symbolcall MPI_Comm_rank(comm::Ptr{Ptr{UInt8}}, ⅋(_comm_rank)::Ptr{Int64})::Int32
+    #     return _comm_rank[]::Int
+    # end
     @inline function MPI_Comm_rank(comm::Mpich.MPI_Comm) #MPICH
         _comm_rank = Ref(Int32(0))
         Mpich.MPI_Comm_rank(comm, ⅋(_comm_rank))
