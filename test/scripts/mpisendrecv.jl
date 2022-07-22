@@ -1,7 +1,7 @@
 using StaticCompiler, StaticTools, StaticMPI, MPICH_jll
 libpath = joinpath(first(splitdir(MPICH_jll.PATH[])), "lib")
 
-function mpisendrecv(argc, argv)
+function mpisendrecv(argc::Int, argv::Ptr{Ptr{UInt8}})
  	status = MPI_Init(argc, argv)
 	if status != MPI_SUCCESS
 		printf(c"ERROR: MPI failed to initialize")::Int32
@@ -21,7 +21,7 @@ function mpisendrecv(argc, argv)
 			MPI_Irecv(buffer[i:i], i, 0, MPI_COMM_WORLD, requests[i:i])
 		end
 		statuses = MallocArray{StaticMPI.Mpich.MPI_Status,1}(undef, nworkers)
-		index = MPI_Waitall(requests, statuses)
+		MPI_Waitall(requests, statuses)
 		printf((c"Rank 0 recieved", buffer, c"\n"))
 		free(statuses)
 		free(requests)
@@ -29,12 +29,16 @@ function mpisendrecv(argc, argv)
     else
 		rng = BoxMuller(world_rank % Int64)
 		x = randn(rng)
-		MPI_Isend(Ref(x), 0, 0, comm)
+		_x = Base.RefValue(x)
+		MPI_Isend(_x, 0, 0, comm)::Int32
 		printf((c"rank ", world_rank, c", generated, ", x, c"\n"))
     end
     MPI_Finalize()
 	return 0
 end
+
+argc = 2
+argv = pointer([pointer([0x35, 0x00]), pointer([0x35, 0x00])])
 
 ## ---
 compile_executable(mpisendrecv, (Int, Ptr{Ptr{UInt8}}), "./";
