@@ -4,6 +4,9 @@ using MPICH_jll
 
 @testset "StaticMPI.jl" begin
 
+    @test MPICH_jll.is_available()
+    @static if MPICH_jll.is_available()
+
     let
         status = -1
         try
@@ -56,4 +59,5 @@ using MPICH_jll
         free(A)
     end
 
+    end
 end
