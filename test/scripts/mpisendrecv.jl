@@ -20,12 +20,8 @@ function mpisendrecv(argc, argv)
             # of StaticTools.MallocArrays returns a view
         end
         MPI_Waitall(requests)
-
         printf((c"Rank 0 recieved:\n", buffer, c"\n"))
-        fp = fopen(c"results.csv", c"w")
-        printf(fp, buffer)
-        fclose(fp)
-
+        printdlm(c"results.csv", buffer)
         free(requests), free(buffer)
     else
         rng = BoxMuller(world_rank)
@@ -41,6 +37,11 @@ function mpisendrecv(argc, argv)
 end
 
 ## ---
+
 compile_executable(mpisendrecv, (Int, Ptr{Ptr{UInt8}}), "./";
     cflags=`-lm -lmpi -L$libpath -Wl,-rpath,$libpath`
+    # -lm is for the libc math library (which is automatically included on mac but not linux)
+    # -lmpi is for libmpi
+    # -L$libpath tells the compiler about the path to libmpi
+    # -Wl,-rpath,$libpath tells the linker about the path to libmpi
 )
