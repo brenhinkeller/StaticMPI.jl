@@ -1,7 +1,7 @@
 using StaticCompiler, StaticTools, StaticMPI, MPICH_jll
 libpath = joinpath(first(splitdir(MPICH_jll.PATH[])), "lib")
 
-function mpisendrecv(argc::Int, argv::Ptr{Ptr{UInt8}})
+function mpisendrecv(argc, argv)
  	status = MPI_Init(argc, argv)
 	if status != MPI_SUCCESS
 		printf(c"ERROR: MPI failed to initialize")
@@ -23,7 +23,7 @@ function mpisendrecv(argc::Int, argv::Ptr{Ptr{UInt8}})
 		MPI_Waitall(requests)
 		printf((c"Rank 0 recieved:\n", buffer, c"\n"))
 
-		fp = fopen(c"results.csv",c"w")
+		fp = fopen(c"results.csv", c"w")
 		printf(fp, buffer)
 		fclose(fp)
 

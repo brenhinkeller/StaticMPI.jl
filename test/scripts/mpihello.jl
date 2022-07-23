@@ -1,7 +1,7 @@
 using StaticCompiler, StaticTools, StaticMPI, MPICH_jll
 libpath = joinpath(first(splitdir(MPICH_jll.PATH[])), "lib")
 
-function mpihello_mpich(argc, argv)
+function mpihello(argc, argv)
     MPI_Init(argc, argv)
 
     comm = MPI_COMM_WORLD
@@ -11,6 +11,6 @@ function mpihello_mpich(argc, argv)
     MPI_Finalize()
 end
 
-compile_executable(mpihello_mpich, (Int, Ptr{Ptr{UInt8}}), "./";
+compile_executable(mpihello, (Int, Ptr{Ptr{UInt8}}), "./";
     cflags=`-lmpi -L$libpath -Wl,-rpath,$libpath`
 )
