@@ -40,5 +40,5 @@ end
 
 ## ---
 compile_executable(mpisendrecv, (Int, Ptr{Ptr{UInt8}}), "./";
-    cflags=`-lmpi -L$libpath -Wl,-rpath,$libpath`
+    cflags=`-lm -lmpi -L$libpath -Wl,-rpath,$libpath`
 )
