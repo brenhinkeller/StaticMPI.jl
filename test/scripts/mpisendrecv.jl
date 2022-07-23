@@ -1,6 +1,11 @@
 using StaticCompiler, StaticTools, StaticMPI, MPICH_jll
 libpath = joinpath(first(splitdir(MPICH_jll.PATH[])), "lib")
 
+
+mpitype(::Type{Float32}) = Mpich.MPI_INT32_T
+mpitype(::Type{Float64}) = Mpich.MPI_INT64_T
+
+
 function mpisendrecv(argc::Int, argv::Ptr{Ptr{UInt8}})
  	status = MPI_Init(argc, argv)
 	if status != MPI_SUCCESS
@@ -13,24 +18,28 @@ function mpisendrecv(argc::Int, argv::Ptr{Ptr{UInt8}})
 	nworkers = world_size-1
 
     if world_rank == zero(Int32)
-		buffer = mfill(0.0, nworkers)
+		# buffer = mfill(0.0, nworkers*2)
+		buffer = mfill(0, nworkers*2)
 		requests = mfill(MPI_REQUEST_NULL, nworkers)
 		i = zero(Int32)
 		while i < nworkers
 			i += one(Int32)
-			bview = buffer[i:i]
+			i2 = 2i
+			bview = buffer[i2:i2]
 			rview = requests[i:i]
 			MPI_Irecv(bview, i, zero(Int32), MPI_COMM_WORLD, rview)
 		end
 		statuses = mfill(MPI_STATUS_NULL, nworkers)
-		MPI_Waitall(requests, statuses)
+		Mpich.MPI_Waitall(length(requests)%Int32, ⅋(requests), ⅋(statuses))
+		# MPI_Waitall_bar(requests, statuses)
 		printf((c"Rank 0 recieved:\n", buffer, c"\n"))
 		free(statuses)
 		free(requests)
 		free(buffer)
     else
 		rng = BoxMuller(world_rank % Int64)
-		x = randn(rng)
+		# x = randn(rng)
+		x = 1
 		_x = Base.RefValue(x)
 		MPI_Isend(_x, zero(Int32), zero(Int32), comm)
 		printf((c"rank ", world_rank, c", generated, ", x, c"\n"))
