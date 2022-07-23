@@ -136,10 +136,10 @@ module StaticMPI
 
     @inline MPI_Waitall(requests, statuses) = Mpich.MPI_Waitall(length(requests), ⅋(requests), ⅋(statuses))
     @inline function MPI_Waitall(requests)
-    	statuses = mfill(MPI_STATUS_NULL, length(requests))
-    	rc = MPI_Waitall(requests, statuses)
-    	free(statuses)
-    	rc
+        statuses = mfill(MPI_STATUS_NULL, length(requests))
+        rc = MPI_Waitall(requests, statuses)
+        free(statuses)
+        rc
     end
     export MPI_Waitall
 
