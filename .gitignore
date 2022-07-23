@@ -3,3 +3,6 @@
 *.jl.mem
 Manifest.toml
 /docs/build/
+test/results.csv
+test/mpihello*
+test/mpisendrecv*
