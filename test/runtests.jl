@@ -46,9 +46,38 @@ using MPICH_jll
         println("mpisendrecv:")
         status = -1
         try
-            status = run(`$(MPICH_jll.PATH[])/mpiexec -np 4 ./mpisendrecv`) # --oversubscribe option is not needed with mpich
+            status = run(`$(MPICH_jll.PATH[])/mpiexec -np 8 ./mpisendrecv`) # --oversubscribe option is not needed with mpich
         catch e
             @warn "Could not run ./mpisendrecv"
+            println(e)
+        end
+        @test isa(status, Base.Process)
+        @test isa(status, Base.Process) && status.exitcode == 0
+
+        A = parsedlm(Float64, c"results.csv", ',')
+        @test vec(A) == 1:7
+        free(A)
+    end
+
+
+    let
+        status = -1
+        try
+            isfile("mpisendrecvrand") && rm("mpisendrecvrand")
+            status = run(`julia --compile=min scripts/mpisendrecvrand.jl`)
+        catch e
+            @warn "Could not compile ./scripts/mpisendrecvrand.jl"
+            println(e)
+        end
+        @test isa(status, Base.Process)
+        @test isa(status, Base.Process) && status.exitcode == 0
+
+        println("mpisendrecvrand:")
+        status = -1
+        try
+            status = run(`$(MPICH_jll.PATH[])/mpiexec -np 4 ./mpisendrecvrand`) # --oversubscribe option is not needed with mpich
+        catch e
+            @warn "Could not run ./mpisendrecvrand"
             println(e)
         end
         @test isa(status, Base.Process)
