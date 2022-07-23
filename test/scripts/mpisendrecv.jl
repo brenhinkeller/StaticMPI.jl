@@ -8,21 +8,18 @@ function mpisendrecv(argc, argv)
 	end
 
     comm = MPI_COMM_WORLD
-    world_size = MPI_Comm_size(comm)
-	world_rank = MPI_Comm_rank(comm)
-	nworkers = world_size - 1
+    world_size, world_rank = MPI_Comm_size(comm), MPI_Comm_rank(comm)
+    nworkers = world_size - 1
 
     if world_rank == 0
 		buffer = mfill(0.0, nworkers)
 		requests = mfill(MPI_REQUEST_NULL, nworkers)
-		i = 0
-		while i < nworkers
-			i += 1
+		for i ∈ 1:nworkers
 			MPI_Irecv(buffer[i:i], i, 10, MPI_COMM_WORLD, requests[i:i])
 		end
 		MPI_Waitall(requests)
-		printf((c"Rank 0 recieved:\n", buffer, c"\n"))
 
+		printf((c"Rank 0 recieved:\n", buffer, c"\n"))
 		fp = fopen(c"results.csv", c"w")
 		printf(fp, buffer)
 		fclose(fp)
@@ -30,6 +27,9 @@ function mpisendrecv(argc, argv)
 		free(requests), free(buffer)
     else
 		rng = BoxMuller(world_rank)
+
+		# Best to use malloc'd things when Sending (or esp. Isend-ing),
+		# to ensure they won't get unwound before send happens
 		x = mfill(randn(rng))
 		printf((c"rank ", world_rank, c", generated, ", x[], c"\n"))
 		MPI_Send(x, 0, 10, comm)
