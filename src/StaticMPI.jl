@@ -145,26 +145,25 @@ module StaticMPI
     end
     export MPI_Wait
 
-    @inline function MPI_Waitany(requests::Buffer{Mpich.MPI_Request})
+    @inline function MPI_Waitany(requests)
         _index, _status = Base.RefValue(zero(Int)), Base.RefValue(MPI_STATUS_NULL)
         Mpich.MPI_Waitany(length(requests), ⅋(requests), ⅋(_index), ⅋(_status))
         _index[]::Int
     end
-    @inline function MPI_Waitany(requests::Buffer{Mpich.MPI_Request}, status)
+    @inline function MPI_Waitany(requests, statuses)
         _index = Base.RefValue(zero(Int))
-        Mpich.MPI_Waitany(length(requests), ⅋(requests), ⅋(_index), ⅋(status))
+        Mpich.MPI_Waitany(length(requests), ⅋(requests), ⅋(_index), ⅋(statuses))
         _index[]::Int
     end
     export MPI_Waitany
 
-    @inline function MPI_Waitall(requests::Buffer{Mpich.MPI_Request})
-        statuses = mfill(MPI_STATUS_NULL, length(requests))
-        Mpich.MPI_Waitall(length(requests), ⅋(requests), ⅋(statuses))
-        free(statuses)::Int
-    end
-    @inline function MPI_Waitall(requests::Buffer{Mpich.MPI_Request}, statuses::Buffer{Mpich.MPI_Request})
-        count = length(requests)
-        Mpich.MPI_Waitall(count, ⅋(requests), ⅋(statuses))::Int
+
+    @inline MPI_Waitall(requests, statuses) = Mpich.MPI_Waitall(length(requests), ⅋(requests), ⅋(statuses))
+    @inline function MPI_Waitall(requests)
+    	statuses = mfill(MPI_STATUS_NULL, length(requests))
+    	rc = MPI_Waitall(requests, statuses)
+    	free(statuses)
+    	rc
     end
     export MPI_Waitall
 
