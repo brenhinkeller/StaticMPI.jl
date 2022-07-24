@@ -19,7 +19,7 @@ Note that the functions herein insert LLVM IR that directly calls functions from
 As such, they will only work when linked against a valid libmpi during compilation.
 If you want to use them interactively in the REPL (e.g., for debugging), you will
 have to first `dlopen` your libmpi with mode `RTLD_GLOBAL` to make the symbols
-from libmpi avialable within your Julia session:
+from libmpi available within your Julia session:
 ```julia
 julia> using Libdl, MPICH_jll, StaticMPI
 
@@ -35,6 +35,7 @@ true
 If any MPI functions herein are ever called *without* linking to libmpi one way or another, expect segfaults!
 
 ## Examples
+#### Hello World:
 ```julia
 julia> using StaticCompiler, StaticTools, StaticMPI
 
@@ -51,8 +52,8 @@ mpihello (generic function with 1 method)
 
 julia> compile_executable(mpihello, (Int, Ptr{Ptr{UInt8}}), "./";
            cflags=`-lmpi -L/opt/local/lib/mpich-mp/`
-           # -lmpi is for libmpi
-           # -L/opt/local/lib/mpich-mp/ provides path to my local MPICH installation
+           # -lmpi instructs compiler to link against libmpi.so / libmpi.dylib
+           # -L/opt/local/lib/mpich-mp/ provides path to my local MPICH installation where libmpi can be found
        )
 
 ld: warning: object file (./mpihello.o) was built for newer OSX version (12.0) than being linked (10.13)
@@ -64,7 +65,7 @@ Hello from 3 of 4 processors!
 Hello from 2 of 4 processors!
 Hello from 0 of 4 processors!
 ```
-Send and recieve:
+#### Send and recieve:
 ```julia
 using StaticCompiler, StaticTools, StaticMPI, MPICH_jll
 libpath = joinpath(first(splitdir(MPICH_jll.PATH[])), "lib")
@@ -105,7 +106,7 @@ end
 # Compile it to binary executable
 compile_executable(mpisendrecv, (Int, Ptr{Ptr{UInt8}}), "./";
     cflags=`-lmpi -L$libpath -Wl,-rpath,$libpath`
-    # -lmpi is for libmpi
+    # -lmpi instructs compiler to link against libmpi.so / libmpi.dylib
     # -L$libpath tells the compiler about the path to libmpi
     # -Wl,-rpath,$libpath tells the linker about the path to libmpi (not needed on all systems)
 )
