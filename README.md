@@ -35,6 +35,9 @@ true
 If any MPI functions herein are ever called *without* linking to libmpi one way or another, expect segfaults!
 
 ## Examples
+Since we're compiling to standalone executables, we'll use the special non-GC-tracked
+arrays and strings from [StaticTools.jl](https://github.com/brenhinkeller/StaticTools.jl)
+in the following examples.
 #### Hello World:
 ```julia
 julia> using StaticCompiler, StaticTools, StaticMPI
@@ -111,6 +114,7 @@ compile_executable(mpisendrecv, (Int, Ptr{Ptr{UInt8}}), "./";
     # -Wl,-rpath,$libpath tells the linker about the path to libmpi (not needed on all systems)
 )
 ```
+Since this example linked to the `libmpi` from [MPICH_jll](https://github.com/JuliaBinaryWrappers/MPICH_jll.jl), let's also use the `mpiexec` `from MPICH_jll`.
 ```julia
 shell> $(MPICH_jll.PATH[])/mpiexec -np 6 ./mpisendrecv
 Rank 1, sending 1
