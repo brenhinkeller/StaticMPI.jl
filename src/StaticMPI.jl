@@ -32,7 +32,7 @@ module StaticMPI
 
     Returns `MPI_SUCCESS` on success
     """
-    @inline MPI_Init() = MPI_Init(0, C_NULL)
+    @inline MPI_Init() = MPI_Init(0, ⅋(Ref(Ptr{UInt8}(C_NULL))))
     @inline function MPI_Init(argc::Int, argv::Ptr{Ptr{UInt8}})
         c,v = Base.RefValue(argc), Base.RefValue(argv)
         Mpich.MPI_Init(⅋(c), ⅋(v))
