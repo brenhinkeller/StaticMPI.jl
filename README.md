@@ -17,10 +17,26 @@ is still relatively incomplete and under active development.
 
 Note that the functions herein insert LLVM IR that directly calls functions from libmpi.
 As such, they will only work when linked against a valid libmpi during compilation.
-For example, they will generally **not** work interactively in the REPL.
-If they are called *without* linking to libmpi, expect segfaults!
+If you want to use them interactively in the REPL (e.g., for debugging), you will
+have to first `dlopen` your libmpi with mode `RTLD_GLOBAL` to make the symbols
+from libmpi avialable within your Julia session:
 ```julia
-julia> using StaticTools, StaticCompiler, StaticMPI
+julia> using Libdl, MPICH_jll, StaticMPI
+
+julia> path_to_libmpi = joinpath(first(splitdir(MPICH_jll.PATH[])), "lib", "libmpi")
+"/Users/me/.julia/artifacts/10a7002eea557072e8e2ec81f16de1421d5bf667/lib/libmpi"
+
+julia> dlopen(path_to_libmpi, RTLD_GLOBAL)
+Ptr{Nothing} @0x00007fa51443bbe0
+
+julia> MPI_Init() == MPI_SUCCESS
+true
+```
+If any MPI functions herein are ever called *without* linking to libmpi one way or another, expect segfaults!
+
+## Examples
+```julia
+julia> using StaticCompiler, StaticTools, StaticMPI
 
 julia> function mpihello(argc, argv)
            MPI_Init(argc, argv)
@@ -35,10 +51,12 @@ mpihello (generic function with 1 method)
 
 julia> compile_executable(mpihello, (Int, Ptr{Ptr{UInt8}}), "./";
            cflags=`-lmpi -L/opt/local/lib/mpich-mp/`
+           # -lmpi is for libmpi
+           # -L/opt/local/lib/mpich-mp/ provides path to my local MPICH installation
        )
 
 ld: warning: object file (./mpihello.o) was built for newer OSX version (12.0) than being linked (10.13)
-"/Users/cbkeller/code/StaticTools.jl/mpihello"
+"/Users/me/code/StaticTools.jl/mpihello"
 
 shell> mpiexec -np 4 ./mpihello
 Hello from 1 of 4 processors!
