@@ -35,9 +35,6 @@ true
 If any MPI functions herein are ever called *without* linking to libmpi one way or another, expect segfaults!
 
 ## Examples
-Since we're compiling to standalone executables, we'll use the special non-GC-tracked
-arrays and strings from [StaticTools.jl](https://github.com/brenhinkeller/StaticTools.jl)
-in the following examples.
 #### Hello World:
 ```julia
 julia> using StaticCompiler, StaticTools, StaticMPI
@@ -129,3 +126,6 @@ Rank 0 recieved:
 4
 5
 ```
+Since we're compiling to standalone executables, we've used the special non-GC-allocating
+arrays, strings, and IO from [StaticTools.jl](https://github.com/brenhinkeller/StaticTools.jl)
+throughout the above examples.
