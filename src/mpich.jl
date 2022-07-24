@@ -4,6 +4,7 @@
 module Mpich
 using StaticTools
 
+# Defined instances of MPI types
 export MPI_COMM_NULL, MPI_COMM_WORLD, MPI_COMM_SELF, MPI_GROUP_NULL, MPI_GROUP_EMPTY,
 MPI_WIN_NULL, MPI_FILE_NULL, MPI_REQUEST_NULL, MPI_MESSAGE_NULL, MPI_MESSAGE_NO_PROC,
 MPI_DATATYPE_NULL, MPI_CHAR, MPI_SIGNED_CHAR, MPI_UNSIGNED_CHAR, MPI_BYTE, MPI_WCHAR,
@@ -19,16 +20,18 @@ MPI_AINT, MPI_OFFSET, MPI_COUNT, MPI_OP_NULL, MPI_MAX, MPI_MIN, MPI_SUM, MPI_PRO
 MPI_LAND, MPI_BAND, MPI_LOR, MPI_BOR, MPI_LXOR, MPI_BXOR, MPI_MINLOC, MPI_MAXLOC,
 MPI_REPLACE, MPI_NO_OP, MPI_STATUS_NULL
 
-# Codes
+# Status codes and flags
 export MPI_THREAD_SINGLE, MPI_THREAD_FUNNELED, MPI_THREAD_SERIALIZED,
 MPI_THREAD_MULTIPLE, MPI_IDENT, MPI_CONGRUENT, MPI_SIMILAR, MPI_UNEQUAL,
 MPIX_GPU_SUPPORT_CUDA, MPIX_GPU_SUPPORT_ZE, MPIX_GPU_SUPPORT_HIP,
-MPI_SUCCESS
+MPI_MODE_RDONLY, MPI_MODE_RDWR, MPI_MODE_WRONLY, MPI_MODE_CREATE, MPI_MODE_EXCL,
+MPI_MODE_DELETE_ON_CLOSE, MPI_MODE_UNIQUE_OPEN, MPI_MODE_APPEND,
+MPI_MODE_SEQUENTIAL, MPI_SEEK_SET, MPI_SEEK_CUR, MPI_SEEK_END, MPI_SUCCESS
 
 # Types
 # export MPI_Status, MPI_Comm, MPI_Group, MPI_Win, MPI_Win, MPI_File, MPI_Request,
 # MPI_Message, MPI_Datatype, MPI_Op, MPI_Errhandler, MPI_Info, MPI_Aint, MPI_Fint,
-# MPI_Count
+# MPI_Count, MPIO_Request
 
 abstract type AbstractMpichType end
 
@@ -74,6 +77,7 @@ const MPI_FILE_NULL = MPI_File(0)
 struct MPI_Request <: AbstractMpichType
    x::UInt32
 end
+const MPIO_Request = MPI_Request
 const MPI_REQUEST_NULL   = MPI_Request(0x2c000000)
 
 # MPI message objects for Mprobe and related functions:
@@ -195,6 +199,7 @@ end
 struct MPI_Count <: AbstractMpichType
    x::Int64
 end
+const MPI_Offset = Int64
 
 
 # Various constants:
@@ -247,6 +252,20 @@ const MPI_ERR_INTERN      = 16      #= internal error code    =#
 const MPI_ERR_IN_STATUS   = 17      #= Look in status for error value =#
 const MPI_ERR_PENDING     = 18      #= Pending request =#
 const MPI_ERR_REQUEST     = 19      #= Invalid mpi_request handle =#
+
+# File IO codes:
+const MPI_MODE_RDONLY           =   2
+const MPI_MODE_RDWR             =   8
+const MPI_MODE_WRONLY           =   4
+const MPI_MODE_CREATE           =   1
+const MPI_MODE_EXCL             =  64
+const MPI_MODE_DELETE_ON_CLOSE  =  16
+const MPI_MODE_UNIQUE_OPEN      =  32
+const MPI_MODE_APPEND           = 128
+const MPI_MODE_SEQUENTIAL       = 256
+const MPI_SEEK_SET	           = 600
+const MPI_SEEK_CUR	           = 602
+const MPI_SEEK_END	           = 604
 
 # Convert Julia types to equivalent MPI types
 # Can extend for custom datatypes
@@ -621,5 +640,107 @@ const MPIX_GPU_SUPPORT_ZE    = 1
 const MPIX_GPU_SUPPORT_HIP   = 2
 @inline MPIX_GPU_query_support(gpu_type::Int, is_supported::Ptr{Int}) = MPIX_GPU_query_support(gpu_type::Int, is_supported::Ptr{Int})::Int
 @inline MPIX_Query_cuda_support() = @symbolcall MPIX_Query_cuda_support()::Int
+
+# Files and IO
+@inline MPI_File_open(comm::MPI_Comm, filename::Ptr{UInt8}, amode::Int, info::MPI_Info, fh::Ptr{MPI_File}) =
+	@symbolcall MPI_File_open(comm.x::UInt32, filename::Ptr{UInt8}, amode::Int, info.x::UInt32, fh::Ptr{MPI_File})::Int
+@inline MPI_File_close(fh::Ptr{MPI_File}) = @symbolcall MPI_File_close(fh::Ptr{MPI_File})::Int
+@inline MPI_File_delete(filename::Ptr{UInt8}, info::MPI_Info) = @symbolcall MPI_File_delete(filename::Ptr{UInt8}, info.x::UInt32)::Int
+@inline MPI_File_set_size(file::MPI_File, size::MPI_Offset) = @symbolcall MPI_File_set_size(file.x::Ptr{UInt8}, size::Int64)::Int
+@inline MPI_File_preallocate(file::MPI_File, size::MPI_Offset) = @symbolcall MPI_File_preallocate(file.x::Ptr{UInt8}, size::Int64)::Int
+@inline MPI_File_get_size(file::MPI_File, size::Ptr{MPI_Offset}) = @symbolcall MPI_File_get_size(file.x::Ptr{UInt8}, size::Ptr{Int64})::Int
+@inline MPI_File_get_group(file::MPI_File, group::Ptr{MPI_Group}) = @symbolcall MPI_File_get_group(file.x::Ptr{UInt8}, group::Ptr{MPI_Group})::Int
+@inline MPI_File_get_amode(file::MPI_File, amode::Ptr{Int}) = @symbolcall MPI_File_get_amode(file.x::Ptr{UInt8}, amode::Ptr{Int})::Int
+@inline MPI_File_set_info(file::MPI_File, info::MPI_Info) = @symbolcall MPI_File_set_info(file.x::Ptr{UInt8}, info.x::UInt32)::Int
+@inline MPI_File_get_info(file::MPI_File, info_used::Ptr{MPI_Info}) = @symbolcall MPI_File_get_info(file.x::Ptr{UInt8}, info_used::Ptr{MPI_Info})::Int
+
+@inline MPI_File_set_view(file::MPI_File, disp::MPI_Offset, etype::MPI_Datatype, filetype::MPI_Datatype, datarep::Ptr{UInt8}, info::MPI_Info) =
+	@symbolcall MPI_File_set_view(file.x::Ptr{UInt8}, disp::Int64, etype.x::UInt32, filetype.x::UInt32, datarep::Ptr{UInt8}, info.x::UInt8)::Int
+@inline MPI_File_get_view(file::MPI_File, disp::Ptr{MPI_Offset}, etype::Ptr{MPI_Datatype}, filetype::Ptr{MPI_Datatype}, datarep::Ptr{UInt8}) =
+	@symbolcall MPI_File_get_view(file.x::Ptr{UInt8}, disp::Ptr{Int64}, etype::Ptr{MPI_Datatype}, filetype::Ptr{MPI_Datatype}, datarep::Ptr{UInt8})::Int
+
+@inline MPI_File_read_at(file::MPI_File, offset::MPI_Offset, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_read_at(file.x::Ptr{UInt8}, offset::Int64, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, status::Ptr{MPI_Status})::Int
+@inline MPI_File_read_at_all(file::MPI_File, offset::MPI_Offset, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_read_at_all(file.x::Ptr{UInt8}, offset::Int64, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, status::Ptr{MPI_Status})::Int
+@inline MPI_File_write_at(file::MPI_File, offset::MPI_Offset, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_write_at(file.x::Ptr{UInt8}, offset::Int64, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, status::Ptr{MPI_Status})::Int
+@inline MPI_File_write_at_all(file::MPI_File, offset::MPI_Offset, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_write_at_all(file.x::Ptr{UInt8}, offset::Int64, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, status::Ptr{MPI_Status})::Int
+
+@inline MPI_File_iread_at(file::MPI_File, offset::MPI_Offset, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, request::Ptr{MPIO_Request}) =
+	@symbolcall MPI_File_iread_at(file.x::Ptr{UInt8}, offset::Int64, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, request::Ptr{MPIO_Request})::Int
+@inline MPI_File_iwrite_at(file::MPI_File, offset::MPI_Offset, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, request::Ptr{MPIO_Request}) =
+	@symbolcall MPI_File_iwrite_at(file.x::Ptr{UInt8}, offset::Int64, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, request::Ptr{MPIO_Request})::Int
+
+@inline MPI_File_read(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_read(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, status::Ptr{MPI_Status})::Int
+@inline MPI_File_read_all(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_read_all(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, status::Ptr{MPI_Status})::Int
+@inline MPI_File_write(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_write(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, status::Ptr{MPI_Status})::Int
+@inline MPI_File_write_all(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_write_all(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, status::Ptr{MPI_Status})::Int
+
+@inline MPI_File_iread(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, request::Ptr{MPIO_Request}) =
+	@symbolcall MPI_File_iread(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, request::Ptr{MPIO_Request})::Int
+@inline MPI_File_iwrite(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, request::Ptr{MPIO_Request}) =
+	@symbolcall MPI_File_iwrite(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, request::Ptr{MPIO_Request})::Int
+
+@inline MPI_File_seek(file::MPI_File, offset::MPI_Offset, whence::Int) =
+	@symbolcall MPI_File_seek(file.x::Ptr{UInt8}, offset::Int64, whence::Int)::Int
+@inline MPI_File_get_position(file::MPI_File, offset::Ptr{MPI_Offset}) =
+	@symbolcall MPI_File_get_position(file.x::Ptr{UInt8}, offset::Ptr{Int64})::Int
+@inline MPI_File_get_byte_offset(file::MPI_File, offset::MPI_Offset, disp::Ptr{MPI_Offset}) =
+	@symbolcall MPI_File_get_byte_offset(file.x::Ptr{UInt8}, offset::Int64, disp::Ptr{Int64})::Int
+
+@inline MPI_File_read_shared(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_read_shared(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, status::Ptr{MPI_Status})::Int
+@inline MPI_File_write_shared(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_write_shared(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, status::Ptr{MPI_Status})::Int
+@inline MPI_File_iread_shared(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, request::Ptr{MPIO_Request}) =
+	@symbolcall MPI_File_iread_shared(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, request::Ptr{MPIO_Request})::Int
+@inline MPI_File_iwrite_shared(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, request::Ptr{MPIO_Request}) =
+	@symbolcall MPI_File_iwrite_shared(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, request::Ptr{MPIO_Request})::Int
+@inline MPI_File_read_ordered(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_read_ordered(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, status::Ptr{MPI_Status})::Int
+@inline MPI_File_write_ordered(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_write_ordered(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, status::Ptr{MPI_Status})::Int
+@inline MPI_File_seek_shared(file::MPI_File, offset::MPI_Offset, whence::Int) =
+	@symbolcall MPI_File_seek_shared(file.x::Ptr{UInt8}, offset::Int64, whence::Int)::Int
+@inline MPI_File_get_position_shared(file::MPI_File, offset::Ptr{MPI_Offset}) =
+	@symbolcall MPI_File_get_position_shared(file.x::Ptr{UInt8}, offset::Ptr{Int64})::Int
+
+@inline MPI_File_read_at_all_begin(file::MPI_File, offset::MPI_Offset, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype) =
+	@symbolcall MPI_File_read_at_all_begin(file.x::Ptr{UInt8}, offset::Int64, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32)::Int
+@inline MPI_File_read_at_all_end(file::MPI_File, buf::Ptr{Nothing}, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_read_at_all_end(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, status::Ptr{MPI_Status})::Int
+@inline MPI_File_write_at_all_begin(file::MPI_File, offset::MPI_Offset, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype) =
+	@symbolcall MPI_File_write_at_all_begin(file.x::Ptr{UInt8}, offset::Int64, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32)::Int
+@inline MPI_File_write_at_all_end(file::MPI_File, buf::Ptr{Nothing}, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_write_at_all_end(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, status::Ptr{MPI_Status})::Int
+@inline MPI_File_read_all_begin(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype) =
+	@symbolcall MPI_File_read_all_begin(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32)::Int
+@inline MPI_File_read_all_end(file::MPI_File, buf::Ptr{Nothing}, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_read_all_end(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, status::Ptr{MPI_Status})::Int
+@inline MPI_File_write_all_begin(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype) =
+	@symbolcall MPI_File_write_all_begin(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32)::Int
+@inline MPI_File_write_all_end(file::MPI_File, buf::Ptr{Nothing}, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_write_all_end(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, status::Ptr{MPI_Status})::Int
+
+@inline MPI_File_read_ordered_begin(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype) =
+	@symbolcall MPI_File_read_ordered_begin(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32)::Int
+@inline MPI_File_read_ordered_end(file::MPI_File, buf::Ptr{Nothing}, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_read_ordered_end(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, status::Ptr{MPI_Status})::Int
+@inline MPI_File_write_ordered_begin(file::MPI_File, buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype) =
+	@symbolcall MPI_File_write_ordered_begin(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, count::Int, datatype.x::UInt32)::Int
+@inline MPI_File_write_ordered_end(file::MPI_File, buf::Ptr{Nothing}, status::Ptr{MPI_Status}) =
+	@symbolcall MPI_File_write_ordered_end(file.x::Ptr{UInt8}, buf::Ptr{Nothing}, status::Ptr{MPI_Status})::Int
+
+# File atomics
+@inline MPI_File_set_atomicity(file::MPI_File, flag::Int) = @symbolcall MPI_File_set_atomicity(file.x::Ptr{UInt8}, flag::Int)::Int
+@inline MPI_File_get_atomicity(file::MPI_File, flag::Ptr{Int}) = @symbolcall MPI_File_get_atomicity(file.x::Ptr{UInt8}, flag::Ptr{Int})::Int
+@inline MPI_File_sync(file::MPI_File) = @symbolcall MPI_File_sync(file.x::Ptr{UInt8})::Int
+
 
 end # module
