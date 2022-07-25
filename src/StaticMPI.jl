@@ -75,17 +75,44 @@ module StaticMPI
     end
     export MPI_Comm_rank
 
+    """
+    ```julia
+    function MPI_Recv(buffer::Buffer{T}, source::Int, tag::Int, comm::MPI_Comm, [status::Buffer{MPI_Status}])
+    ```
+    Receive `length(buffer)` elements of type `T` from rank `source` sent with tag
+    `tag` over MPI communicator `comm`. Recived data is stored in `buffer`, with
+    `MPI_Status` stored in `status`.
 
+    Does not return until the message has been received (blocking receive).
+
+    See also: `MPI_Irecv` for non-blocking equivalent
+    """
     @inline function MPI_Recv(buffer, source, tag, comm::Mpich.MPI_Comm)
         status = Base.RefValue(MPI_STATUS_NULL)
         MPI_Recv(buffer, source, tag, comm, status)
     end
-    @inline function MPI_Recv(buffer::Buffer{T}, source, tag, comm::Mpich.MPI_Comm, status) where T
+    @inline function MPI_Recv(buffer::Buffer{T}, source, tag, comm::Mpich.MPI_Comm, status::Buffer{Mpich.MPI_Status}) where T
         bufptr = Ptr{Nothing}(⅋(buffer))
         Mpich.MPI_Recv(bufptr, length(buffer), Mpich.mpitype(T), source, tag, comm, ⅋(status))
     end
     export MPI_Recv
 
+    """
+    ```julia
+    function MPI_Irecv(buffer::Buffer{T}, source::Int, tag::Int, comm::MPI_Comm, [request::Buffer{MPI_Request}])
+    ```
+    Receive `length(buffer)` elements of type `T` from rank `source` sent with tag
+    `tag` over MPI communicator `comm`. Recived data is stored in `buffer`, with
+    `MPI_Request` stored in `request`.
+
+    Returns immediately, even though `buffer` will not be updated until the message
+    has been received (non-blocking receive). The status of the incoming message
+    can later be checked using the resulting `MPI_Request` object.
+
+    Returns MPI_SUCCESS on success.
+
+    See also: `MPI_Recv` for blocking equivalent, `MPI_Wait`*
+    """
     @inline function MPI_Irecv(buffer, source, tag, comm::Mpich.MPI_Comm)
         request = Base.RefValue(MPI_REQUEST_NULL)
         MPI_Irecv(buffer, source, tag, comm, request)
@@ -96,12 +123,42 @@ module StaticMPI
     end
     export MPI_Irecv
 
+    """
+    ```julia
+    function MPI_Send(buffer::Buffer{T}, dest::Int, tag::Int, comm::MPI_Comm)
+    ```
+    Send `length(buffer)` elements of type `T` to rank `source` with tag `tag`
+    over MPI communicator `comm`.
+
+    Does not return until `buffer` can safely be reused, which may not be until
+    the message has been received (blocking send).
+
+    Returns MPI_SUCCESS on success.
+
+    See also: `MPI_Isend` for non-blocking equivalent
+    """
     @inline function MPI_Send(buffer::Buffer{T}, dest, tag, comm::Mpich.MPI_Comm) where T
         bufptr = Ptr{Nothing}(⅋(buffer))
         Mpich.MPI_Send(bufptr, length(buffer), Mpich.mpitype(T), dest, tag, comm)
     end
     export MPI_Send
 
+    """
+    ```julia
+    function MPI_Isend(buffer::Buffer{T}, dest::Int, tag::Int, comm::MPI_Comm, [request::Buffer{MPI_Request}])
+    ```
+    Send `length(buffer)` elements of type `T` to rank `source` with tag `tag`
+    over MPI communicator `comm`, with resulting `MPI_Request` stored in
+    `request`.
+
+    Returns immediately, regardless of whether the message has been received
+    (non-blocking send). The status of the sent message can later be checked
+    using the resulting `MPI_Request` object.
+
+    Returns MPI_SUCCESS on success.
+
+    See also: `MPI_Send` for blocking equivalent, `MPI_Wait`*
+    """
     @inline function MPI_Isend(buffer, dest, tag, comm::Mpich.MPI_Comm)
         request = Base.RefValue(MPI_REQUEST_NULL)
         Mpich.MPI_Isend(buffer, dest, tag, comm, request)
@@ -116,6 +173,18 @@ module StaticMPI
     @inline MPI_Barrier(comm::Mpich.MPI_Comm) = Mpich.MPI_Barrier(comm)
     export MPI_Barrier
 
+    """
+    ```julia
+    MPI_Wait(request::MPI_Request, [status::Buffer{MPI_Status}])
+    ```
+    Wait (i.e., do not return) until the operation corresponding to the
+    `MPI_request` object `request` has been completed. The resulting `MPI_Status`
+    objects will be stored in the buffer `status`
+
+    Returns MPI_SUCCESS on success.
+
+    See also: `MPI_Isend`, `MPI_Irecv`, etc.
+    """
     @inline MPI_Wait(request, status::Buffer{Mpich.MPI_Status}) = Mpich.MPI_Wait(⅋(request), ⅋(status))
     @inline function MPI_Wait(request::Mpich.MPI_Request)
         status = Base.RefValue(MPI_STATUS_NULL)
@@ -123,6 +192,19 @@ module StaticMPI
     end
     export MPI_Wait
 
+    """
+    ```julia
+    MPI_Waitany(array_of_requests::Buffer{MPI_Request}, [status::Buffer{MPI_Status}])
+    ```
+    Wait (i.e., do not return) until the at least one of the operations
+    corresponding to the `MPI_request` objects in `array_of_requests``
+    has been completed. The resulting `MPI_Status` object for the first operation
+    to complete will be stored in `status`.
+
+    Returns the index of the request corresponding to the first operation to complete.
+
+    See also: `MPI_Isend`, `MPI_Irecv`, etc.
+    """
     @inline function MPI_Waitany(requests)
         statuses = Base.RefValue(MPI_STATUS_NULL)
         MPI_Waitany(requests, statuses)
@@ -134,6 +216,19 @@ module StaticMPI
     end
     export MPI_Waitany
 
+    """
+    ```julia
+    MPI_Waitall(array_of_requests::Buffer{MPI_Request}, [array_of_statuses::Buffer{MPI_Status}])
+    ```
+    Wait (i.e., do not return) until the all of the operation scorresponding
+    to the `MPI_request` objects in `array_of_requests` have been completed.
+    The resulting `MPI_Status` objects will be stored in the corresponding
+    positions of `array_of_statuses`.
+
+    Returns MPI_SUCCESS on success.
+
+    See also: `MPI_Isend`, `MPI_Irecv`, etc.
+    """
     @inline function MPI_Waitall(requests)
         statuses = mfill(MPI_STATUS_NULL, length(requests))
         rc = MPI_Waitall(requests, statuses)
