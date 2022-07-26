@@ -32,7 +32,7 @@ module StaticMPI
 
     Returns `MPI_SUCCESS` on success
     """
-    @inline MPI_Init() = MPI_Init(0, ⅋(Ref(Ptr{UInt8}(C_NULL))))
+    @inline MPI_Init() = MPI_Init(0, ⅋(Base.RefValue(Ptr{UInt8}(C_NULL))))
     @inline function MPI_Init(argc::Int, argv::Ptr{Ptr{UInt8}})
         c,v = Base.RefValue(argc), Base.RefValue(argv)
         Mpich.MPI_Init(⅋(c), ⅋(v))
@@ -206,12 +206,12 @@ module StaticMPI
     See also: `MPI_Isend`, `MPI_Irecv`, etc.
     """
     @inline function MPI_Waitany(requests)
-        statuses = Base.RefValue(MPI_STATUS_NULL)
-        MPI_Waitany(requests, statuses)
+        status = Base.RefValue(MPI_STATUS_NULL)
+        MPI_Waitany(requests, status)
     end
-    @inline function MPI_Waitany(requests, statuses)
+    @inline function MPI_Waitany(requests, status)
         index = Base.RefValue(0)
-        Mpich.MPI_Waitany(length(requests), ⅋(requests), ⅋(index), ⅋(statuses))
+        Mpich.MPI_Waitany(length(requests), ⅋(requests), ⅋(index), ⅋(status))
         index[]
     end
     export MPI_Waitany
@@ -230,9 +230,9 @@ module StaticMPI
     See also: `MPI_Isend`, `MPI_Irecv`, etc.
     """
     @inline function MPI_Waitall(requests)
-        statuses = mfill(MPI_STATUS_NULL, length(requests))
-        rc = MPI_Waitall(requests, statuses)
-        free(statuses); rc
+        mfill(MPI_STATUS_NULL, length(requests)) do statuses
+            rc = MPI_Waitall(requests, statuses)
+        end
     end
     @inline MPI_Waitall(requests, statuses) = Mpich.MPI_Waitall(length(requests), ⅋(requests), ⅋(statuses))
     export MPI_Waitall
