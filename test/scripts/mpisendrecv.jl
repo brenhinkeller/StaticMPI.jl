@@ -21,6 +21,7 @@ function mpisendrecv(argc, argv)
         MPI_Waitall(requests)
         printf((c"Rank 0 recieved:\n", buffer, c"\n"))
         printdlm(c"results.csv", buffer)
+        MPI_Barrier(comm)
         free(requests), free(buffer)
     else
         # Send results back to root node
@@ -29,6 +30,7 @@ function mpisendrecv(argc, argv)
         x = mfill(world_rank)
         printf((c"Rank ", world_rank, c", sending ", x[], c"\n"))
         MPI_Send(x, 0, 10, comm)
+        MPI_Barrier(comm)
         free(x)
     end
     MPI_Finalize()

@@ -169,7 +169,17 @@ module StaticMPI
     end
     export MPI_Isend
 
+    """
+    ```julia
+    MPI_Barrier(comm::Mpich.MPI_Comm)
+    ```
+    Wait (i.e., do not return) until all ranks of the communicator `comm` have
+    called `MPI_Barrier`.
 
+    Returns MPI_SUCCESS on success.
+
+    See also: `MPI_Wait`, `MPI_Waitall`, `MPI_Waitany`.
+    """
     @inline MPI_Barrier(comm::Mpich.MPI_Comm) = Mpich.MPI_Barrier(comm)
     export MPI_Barrier
 
@@ -183,7 +193,7 @@ module StaticMPI
 
     Returns MPI_SUCCESS on success.
 
-    See also: `MPI_Isend`, `MPI_Irecv`, etc.
+    See also: `MPI_Isend`, `MPI_Irecv`, C.f. `MPI_Waitany`, `MPI_Waitall`
     """
     @inline MPI_Wait(request, status::Buffer{Mpich.MPI_Status}) = Mpich.MPI_Wait(⅋(request), ⅋(status))
     @inline function MPI_Wait(request::Mpich.MPI_Request)
@@ -203,7 +213,7 @@ module StaticMPI
 
     Returns the index of the request corresponding to the first operation to complete.
 
-    See also: `MPI_Isend`, `MPI_Irecv`, etc.
+    See also: `MPI_Isend`, `MPI_Irecv`, C.f. `MPI_Wait`, `MPI_Waitall`
     """
     @inline function MPI_Waitany(requests)
         status = Base.RefValue(MPI_STATUS_NULL)
@@ -227,7 +237,7 @@ module StaticMPI
 
     Returns MPI_SUCCESS on success.
 
-    See also: `MPI_Isend`, `MPI_Irecv`, etc.
+    See also: `MPI_Isend`, `MPI_Irecv`, C.f. `MPI_Wait`, `MPI_Waitany`
     """
     @inline function MPI_Waitall(requests)
         mfill(MPI_STATUS_NULL, length(requests)) do statuses
