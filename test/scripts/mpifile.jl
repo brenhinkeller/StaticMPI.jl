@@ -24,7 +24,7 @@ end
 
 # Compile it to binary executable
 compile_executable(mpifile, (Int, Ptr{Ptr{UInt8}}), "./";
-    cflags=`-lmpi -L$libpath -Wl,-rpath,$libpath`
+    cflags=`-lm -lmpi -L$libpath -Wl,-rpath,$libpath`
     # -lmpi is for libmpi
     # -L$libpath tells the compiler about the path to libmpi
     # -Wl,-rpath,$libpath tells the linker about the path to libmpi (not needed on all systems)
