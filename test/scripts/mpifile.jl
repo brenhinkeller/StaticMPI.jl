@@ -10,15 +10,20 @@ function mpifile(argc, argv)
 
     printf((c"About to write from ", world_rank, c" of ", world_size, c" processors!\n"))
 
+    # Ensure file exists
     world_rank == 0 && fclose(fopen(c"./results.b", c"w"))
-    fp = MPI_File_open(comm, c"./results.b", MPI_MODE_RDWR)
+    MPI_Barrier(comm)
 
+    # Write from each process
+    fp = MPI_File_open(comm, c"./results.b", MPI_MODE_RDWR)
+    
     mfill(0x30+(world_rank % UInt8), 4) do data
         MPI_File_write_at_all(fp, world_rank*sizeof(data), data)
+        MPI_Barrier(comm)
     end
 
     MPI_File_close(fp)
-    MPI_Barrier(comm)
+
     MPI_Finalize()
 end
 
