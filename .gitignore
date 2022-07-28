@@ -1,8 +1,10 @@
+.DS_Store
 *.jl.*.cov
 *.jl.cov
 *.jl.mem
 Manifest.toml
 /docs/build/
-test/results.csv
+test/results*
+test/mpifile*
 test/mpihello*
 test/mpisendrecv*

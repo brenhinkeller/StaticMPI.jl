@@ -75,6 +75,7 @@ using MPICH_jll
         println("mpisendrecvrand:")
         status = -1
         try
+            isfile("results.csv") && rm("results.csv")
             status = run(`$(MPICH_jll.PATH[])/mpiexec -np 4 ./mpisendrecvrand`) # --oversubscribe option is not needed with mpich
         catch e
             @warn "Could not run ./mpisendrecvrand"
@@ -86,6 +87,34 @@ using MPICH_jll
         A = parsedlm(Float64, c"results.csv", ',')
         @test A ≈ [-0.1075215, -2.110675, -0.6649428]
         free(A)
+    end
+
+    let
+        status = -1
+        try
+            isfile("mpifile") && rm("mpifile")
+            status = run(`julia --compile=min scripts/mpifile.jl`)
+        catch e
+            @warn "Could not compile ./scripts/mpifile.jl"
+            println(e)
+        end
+        @test isa(status, Base.Process)
+        @test isa(status, Base.Process) && status.exitcode == 0
+
+        println("mpifile:")
+        status = -1
+        try
+            isfile("results.b") && rm("results.b")
+            status = run(`$(MPICH_jll.PATH[])/mpiexec -np 4 ./mpifile`) # --oversubscribe option is not needed with mpich
+        catch e
+            @warn "Could not run ./mpifile"
+            println(e)
+        end
+        @test isa(status, Base.Process)
+        @test isa(status, Base.Process) && status.exitcode == 0
+
+        A = read("results.b", String)
+        @test A == "0000111122223333"
     end
 
     end

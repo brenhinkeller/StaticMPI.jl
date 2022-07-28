@@ -32,7 +32,7 @@ MPI_MODE_SEQUENTIAL, MPI_SEEK_SET, MPI_SEEK_CUR, MPI_SEEK_END, MPI_SUCCESS
 # Types
 # export MPI_Status, MPI_Comm, MPI_Group, MPI_Win, MPI_Win, MPI_File, MPI_Request,
 # MPI_Message, MPI_Datatype, MPI_Op, MPI_Errhandler, MPI_Info, MPI_Aint, MPI_Fint,
-# MPI_Count, MPIO_Request
+# MPI_Count, MPIO_Request, MPI_Offset
 
 abstract type AbstractMpichType end
 
@@ -282,6 +282,7 @@ mpitype(::Type{UInt64}) = MPI_UINT64_T
 mpitype(::Type{Float16}) = MPI_UINT16_T
 mpitype(::Type{Float32}) = MPI_FLOAT
 mpitype(::Type{Float64}) = MPI_DOUBLE
+export mpitype
 
 # Functions
 @inline MPI_Init(argc::Ptr{Int}, argv::Ptr{Ptr{Ptr{UInt8}}}) = @symbolcall MPI_Init(argc::Ptr{Int}, argv::Ptr{Ptr{Ptr{UInt8}}})::Int

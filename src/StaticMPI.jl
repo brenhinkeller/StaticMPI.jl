@@ -247,4 +247,30 @@ module StaticMPI
     @inline MPI_Waitall(requests, statuses) = Mpich.MPI_Waitall(length(requests), ⅋(requests), ⅋(statuses))
     export MPI_Waitall
 
+    # File IO
+    @inline function MPI_File_open(comm, filename, amode::Int)
+        file = Base.RefValue(MPI_FILE_NULL)
+        MPI_File_open(comm, filename, amode, MPI_INFO_NULL, file)
+        file[]
+    end
+    @inline function MPI_File_open(comm::Mpich.MPI_Comm, filename::AbstractString, amode::Int, info::Mpich.MPI_Info, file::Buffer{Mpich.MPI_File})
+        GC.@preserve filename Mpich.MPI_File_open(comm, ⅋(filename), amode, info, ⅋(file))
+    end
+    export MPI_File_open
+
+    @inline MPI_File_close(file::Mpich.MPI_File) = MPI_File_close(Base.RefValue(file))
+    @inline MPI_File_close(file::Buffer{Mpich.MPI_File}) = Mpich.MPI_File_close(⅋(file))
+    export MPI_File_close
+
+    @inline function MPI_File_write_at_all(file, offset, buf)
+        status = Base.RefValue(MPI_STATUS_NULL)
+        MPI_File_write_at_all(file, offset, buf, status)
+    end
+    @inline function MPI_File_write_at_all(file::Mpich.MPI_File, offset::Int64, buf::Buffer{T}, status::Buffer{Mpich.MPI_Status}) where T
+        bufptr = Ptr{Nothing}(⅋(buf))
+        Mpich.MPI_File_write_at_all(file, offset, bufptr, length(buf), Mpich.mpitype(T), ⅋(status))
+    end
+    export MPI_File_write_at_all
+
+
 end # module
