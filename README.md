@@ -1,7 +1,9 @@
 # StaticMPI
 
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://brenhinkeller.github.io/StaticMPI.jl/dev/)
-[![Build Status](https://github.com/brenhinkeller/StaticMPI.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/brenhinkeller/StaticMPI.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![CI](https://github.com/brenhinkeller/StaticMPI.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/brenhinkeller/StaticMPI.jl/actions/workflows/CI.yml)
+[![CI (Julia nightly)](https://github.com/brenhinkeller/StaticMPI.jl/workflows/CI%20(Julia%20nightly)/badge.svg)](https://github.com/brenhinkeller/StaticMPI.jl/actions/workflows/CI-julia-nightly.yml)
+
 
 An MPICH-compatible interface for calling [MPI](https://www.mpi-forum.org/) from
 [`StaticCompiler.compile_executable`](https://github.com/tshort/StaticCompiler.jl)'d
