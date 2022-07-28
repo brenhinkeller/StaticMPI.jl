@@ -6,8 +6,8 @@
 
 
 An MPICH-compatible interface for calling [MPI](https://www.mpi-forum.org/) from
-[`StaticCompiler.compile_executable`](https://github.com/tshort/StaticCompiler.jl)'d
-standalone Julia executables.
+[StaticCompiler.jl](https://github.com/tshort/StaticCompiler.jl) `compile_executable`'d
+standalone Julia executables, building upon the [StaticTools.jl](https://github.com/brenhinkeller/StaticTools.jl) approach.
 
 For all purposes other than compiling standalone exacutables, see
 [MPI.jl](https://github.com/JuliaParallel/MPI.jl) instead.
