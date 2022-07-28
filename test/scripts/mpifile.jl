@@ -13,11 +13,12 @@ function mpifile(argc, argv)
     world_rank == 0 && fclose(fopen(c"./results.b", c"w"))
     fp = MPI_File_open(comm, c"./results.b", MPI_MODE_RDWR)
 
-    data = mfill(0x30+(world_rank % UInt8), 4)
-    MPI_File_write_at_all(fp, world_rank*sizeof(data), data)
-    free(data)
+    mfill(0x30+(world_rank % UInt8), 4) do data
+        MPI_File_write_at_all(fp, world_rank*sizeof(data), data)
+    end
 
     MPI_File_close(fp)
+    MPI_Barrier(comm)
     MPI_Finalize()
 end
 
