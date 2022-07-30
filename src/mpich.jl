@@ -285,11 +285,45 @@ mpitype(::Type{Float64}) = MPI_DOUBLE
 export mpitype
 
 # Functions
+# Initialize and finalize
 @inline MPI_Init(argc::Ptr{Int}, argv::Ptr{Ptr{Ptr{UInt8}}}) = @symbolcall MPI_Init(argc::Ptr{Int}, argv::Ptr{Ptr{Ptr{UInt8}}})::Int
 @inline MPI_Finalize() = @symbolcall MPI_Finalize()::Int
 @inline MPI_Initialized(flag::Ptr{Int}) = @symbolcall MPI_Initialized(flag::Ptr{Int})::Int
 @inline MPI_Abort(comm::MPI_Comm, errorcode::Int) = @symbolcall MPI_Abort(comm.x::UInt32, errorcode::Int)::Int
 
+# MPI Communicators
+@inline MPI_Comm_size(comm::MPI_Comm, size::Ptr{Int}) = @symbolcall MPI_Comm_size(comm.x::UInt32, size::Ptr{Int})::Int
+@inline MPI_Comm_rank(comm::MPI_Comm, size::Ptr{Int}) = @symbolcall MPI_Comm_rank(comm.x::UInt32, size::Ptr{Int})::Int
+@inline MPI_Comm_compare(comm1::MPI_Comm, comm2::MPI_Comm, result::Ptr{Int}) = @symbolcall MPI_Comm_compare(comm1.x::UInt32, comm2.x::UInt32, result::Ptr{Int})::Int
+@inline MPI_Comm_dup(comm::MPI_Comm, newcomm::Ptr{MPI_Comm}) = @symbolcall MPI_Comm_dup(comm.x::UInt32, newcomm::Ptr{MPI_Comm})::Int
+@inline MPI_Comm_dup_with_info(comm::MPI_Comm, info::MPI_Info, newcomm::Ptr{MPI_Comm}) = @symbolcall MPI_Comm_dup_with_info(comm.x::UInt32, info.x::UInt32, newcomm::Ptr{MPI_Comm})::Int
+@inline MPI_Comm_create(comm::MPI_Comm, group::MPI_Group, newcomm::Ptr{MPI_Comm}) = @symbolcall MPI_Comm_create(comm.x::UInt32, group.x::UInt32, newcomm::Ptr{MPI_Comm})::Int
+@inline MPI_Comm_split(comm::MPI_Comm, color::Int, key::Int, newcomm::Ptr{MPI_Comm}) = @symbolcall MPI_Comm_split(comm.x::UInt32, color::Int, key::Int, newcomm::Ptr{MPI_Comm})::Int
+@inline MPI_Comm_free(comm::Ptr{MPI_Comm}) = @symbolcall MPI_Comm_free(comm::Ptr{MPI_Comm})::Int
+@inline MPI_Comm_test_inter(comm::MPI_Comm, flag::Ptr{Int}) = @symbolcall MPI_Comm_test_inter(comm.x::UInt32, flag::Ptr{Int})::Int
+@inline MPI_Comm_remote_size(comm::MPI_Comm, size::Ptr{Int}) = @symbolcall MPI_Comm_remote_size(comm.x::UInt32, size::Ptr{Int})::Int
+@inline MPI_Comm_remote_group(comm::MPI_Comm, group::Ptr{MPI_Group}) = @symbolcall MPI_Comm_remote_group(comm.x::UInt32, group::Ptr{MPI_Group})::Int
+@inline MPI_Intercomm_create(local_comm::MPI_Comm, local_leader::Int, peer_comm::MPI_Comm, remote_leader::Int, tag::Int, newintercomm::Ptr{MPI_Comm}) =
+   @symbolcall MPI_Intercomm_create(local_comm.x::UInt32, local_leader::Int, peer_comm.x::UInt32, remote_leader::Int, tag::Int, newintercomm::Ptr{MPI_Comm})::Int
+@inline MPI_Intercomm_merge(intercomm::MPI_Comm, high::Int, newintracomm::Ptr{MPI_Comm}) = @symbolcall MPI_Intercomm_merge(intercomm.x::UInt32, high::Int, newintracomm::Ptr{MPI_Comm})::Int
+
+# MPI Groups
+@inline MPI_Group_size(group::MPI_Group, size::Ptr{Int}) = @symbolcall MPI_Group_size(group.x::UInt32, size::Ptr{Int})::Int
+@inline MPI_Group_rank(group::MPI_Group, rank::Ptr{Int}) = @symbolcall MPI_Group_rank(group.x::UInt32, rank::Ptr{Int})::Int
+@inline MPI_Group_translate_ranks(group1::MPI_Group, n::Int, ranks1::Ptr{Int}, group2::MPI_Group, ranks2::Ptr{Int}) =
+   @symbolcall MPI_Group_translate_ranks(group1.x::UInt32, n::Int, ranks1::Ptr{Int}, group2.x::UInt32, ranks2::Ptr{Int})::Int
+@inline MPI_Group_compare(group1::MPI_Group, group2::MPI_Group, result::Ptr{Int}) = @symbolcall MPI_Group_compare(group1.x::UInt32, group2.x::UInt32, result::Ptr{Int})::Int
+@inline MPI_Comm_group(comm::MPI_Comm, group::Ptr{MPI_Group}) = @symbolcall MPI_Group_compare(group1.x::UInt32, group2.x::UInt32, result::Ptr{Int})::Int
+@inline MPI_Group_union(group1::MPI_Group, group2::MPI_Group, newgroup::Ptr{MPI_Group}) = @symbolcall MPI_Group_union(group1.x::UInt32, group2.x::UInt32, newgroup::Ptr{MPI_Group})::Int
+@inline MPI_Group_intersection(group1::MPI_Group, group2::MPI_Group, newgroup::Ptr{MPI_Group}) = @symbolcall MPI_Group_intersection(group1.x::UInt32, group2.x::UInt32, newgroup::Ptr{MPI_Group})::Int
+@inline MPI_Group_difference(group1::MPI_Group, group2::MPI_Group, newgroup::Ptr{MPI_Group}) = @symbolcall MPI_Group_difference(group1.x::UInt32, group2.x::UInt32, newgroup::Ptr{MPI_Group})::Int
+@inline MPI_Group_incl(group::MPI_Group, n::Int, ranks::Ptr{Int}, newgroup::Ptr{MPI_Group}) = @symbolcall MPI_Group_incl(group.x::UInt32, n::Int, ranks::Ptr{Int}, newgroup::Ptr{MPI_Group})::Int
+@inline MPI_Group_excl(group::MPI_Group, n::Int, ranks::Ptr{Int}, newgroup::Ptr{MPI_Group}) = @symbolcall MPI_Group_excl(group.x::UInt32, n::Int, ranks::Ptr{Int}, newgroup::Ptr{MPI_Group})::Int
+@inline MPI_Group_range_incl(group::MPI_Group, n::Int, ranges::Ptr{Int}, newgroup::Ptr{MPI_Group}) = @symbolcall MPI_Group_range_incl(group.x::UInt32, n::Int, ranges::Ptr{Int}, newgroup::Ptr{MPI_Group})::Int
+@inline MPI_Group_range_excl(group::MPI_Group, n::Int, ranges::Ptr{Int}, newgroup::Ptr{MPI_Group}) = @symbolcall MPI_Group_range_excl(group.x::UInt32, n::Int, ranges::Ptr{Int}, newgroup::Ptr{MPI_Group})::Int
+@inline MPI_Group_free(group::Ptr{MPI_Group}) = @symbolcall MPI_Group_free(group::Ptr{MPI_Group})::Int
+
+# Send and recieve
 @inline MPI_Recv( buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, source::Int, tag::Int, comm::MPI_Comm, status::Ptr{MPI_Status}) =
    @symbolcall MPI_Recv(buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, source::Int, tag::Int, comm.x::UInt32, status::Ptr{MPI_Status})::Int
 @inline MPI_Irecv(buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, source::Int, tag::Int, comm::MPI_Comm, request::Ptr{MPI_Request}) =
@@ -328,40 +362,6 @@ export mpitype
       dest::Int, sendtag::Int, source::Int, recvtag::Int, comm.x::UInt32,
       status::Ptr{MPI_Status})::Int
 
-@inline MPI_Barrier(comm::MPI_Comm) = @symbolcall MPI_Barrier(comm.x::UInt32)::Int
-@inline MPI_Wait(request::Ptr{MPI_Request}, status::Ptr{MPI_Status}) =
-   @symbolcall MPI_Wait(request::Ptr{MPI_Request}, status::Ptr{MPI_Status})::Int
-@inline MPI_Waitany(count::Int, array_of_requests::Ptr{MPI_Request}, index::Ptr{Int}, status::Ptr{MPI_Status}) =
-   @symbolcall MPI_Waitany(count::Int, array_of_requests::Ptr{MPI_Request}, index::Ptr{Int}, status::Ptr{MPI_Status})::Int
-@inline MPI_Waitall(count::Int, array_of_requests::Ptr{MPI_Request}, array_of_statuses::Ptr{MPI_Status}) =
-   @symbolcall MPI_Waitall(count::Int, array_of_requests::Ptr{MPI_Request}, array_of_statuses::Ptr{MPI_Status})::Int
-@inline MPI_Waitsome(incount::Int, array_of_requests::Ptr{MPI_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status}) =
-   @symbolcall MPI_Waitsome(incount::Int, array_of_requests::Ptr{MPI_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
-
-@inline MPI_Test(request::Ptr{MPI_Request}, flag::Ptr{Int}, status::Ptr{MPI_Status}) =
-   @symbolcall MPI_Test(request::Ptr{MPI_Request}, flag::Ptr{Int}, status::Ptr{MPI_Status})::Int
-@inline MPI_Testany(count::Int, array_of_requests::Ptr{MPI_Request}, index::Ptr{Int}, flag::Ptr{Int}, status::Ptr{MPI_Status}) =
-   @symbolcall MPI_Testany(count::Int, array_of_requests::Ptr{MPI_Request}, index::Ptr{Int}, flag::Ptr{Int}, status::Ptr{MPI_Status})::Int
-@inline MPI_Testall(count::Int, array_of_requests::Ptr{MPI_Request}, flag::Ptr{Int}, array_of_statuses::Ptr{MPI_Status}) =
-   @symbolcall MPI_Testall(count::Int, array_of_requests::Ptr{MPI_Request}, flag::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
-@inline MPI_Testsome(incount::Int, array_of_requests::Ptr{MPI_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status}) =
-   @symbolcall MPI_Testsome(incount::Int, array_of_requests::Ptr{MPI_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
-@inline MPI_Test_cancelled(status::Ptr{MPI_Status}, flag::Ptr{Int}) =
-   @symbolcall MPI_Test_cancelled(status::Ptr{MPI_Status}, flag::Ptr{Int})::Int
-
-@inline MPI_Cancel(request::Ptr{MPI_Request}) =
-   @symbolcall MPI_Cancel(request::Ptr{MPI_Request})::Int
-@inline MPI_Request_free(request::Ptr{MPI_Request}) =
-   @symbolcall MPI_Request_free(request::Ptr{MPI_Request})::Int
-@inline MPI_Buffer_attach(buffer::Ptr{Nothing}, size::Int) =
-   @symbolcall MPI_Buffer_attach(buffer::Ptr{Nothing}, size::Int)::Int
-@inline MPI_Buffer_detach(buffer_addr::Ptr{Nothing}, size::Ptr{Int}) =
-   @symbolcall MPI_Buffer_attach(buffer::Ptr{Nothing}, size::Int)::Int
-
-@inline MPI_Probe(source::Int, tag::Int, comm::MPI_Comm, status::Ptr{MPI_Status}) =
-   @symbolcall MPI_Probe(source::Int, tag::Int, comm.x::UInt32, status::Ptr{MPI_Status})::Int
-@inline MPI_Iprobe(source::Int, tag::Int, comm::MPI_Comm, flag::Ptr{Int}, status::Ptr{MPI_Status}) =
-   @symbolcall MPI_Iprobe(source::Int, tag::Int, comm.x::UInt32, flag::Ptr{Int}, status::Ptr{MPI_Status})::Int
 
 @inline MPI_Send_init(buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, dest::Int, tag::Int, comm::MPI_Comm, request::Ptr{MPI_Request}) =
    @symbolcall MPI_Send_init(buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, dest::Int, tag::Int, comm.x::UInt32, request::Ptr{MPI_Request})::Int
@@ -436,36 +436,6 @@ export mpitype
    @symbolcall MPI_Alltoallw(sendbuf::Ptr{Nothing}, sendcount::Ptr{Int}, sdispls::Ptr{Int}, sendtypes::Ptr{MPI_Datatype},
       recvbuf::Ptr{Nothing}, recvcount::Ptr{Int}, rdispls::Ptr{Int}, recvtypes::Ptr{MPI_Datatype}, comm.x::UInt32)::Int
 
-@inline MPI_Comm_size(comm::MPI_Comm, size::Ptr{Int}) = @symbolcall MPI_Comm_size(comm.x::UInt32, size::Ptr{Int})::Int
-@inline MPI_Comm_rank(comm::MPI_Comm, size::Ptr{Int}) = @symbolcall MPI_Comm_rank(comm.x::UInt32, size::Ptr{Int})::Int
-@inline MPI_Comm_compare(comm1::MPI_Comm, comm2::MPI_Comm, result::Ptr{Int}) = @symbolcall MPI_Comm_compare(comm1.x::UInt32, comm2.x::UInt32, result::Ptr{Int})::Int
-@inline MPI_Comm_dup(comm::MPI_Comm, newcomm::Ptr{MPI_Comm}) = @symbolcall MPI_Comm_dup(comm.x::UInt32, newcomm::Ptr{MPI_Comm})::Int
-@inline MPI_Comm_dup_with_info(comm::MPI_Comm, info::MPI_Info, newcomm::Ptr{MPI_Comm}) = @symbolcall MPI_Comm_dup_with_info(comm.x::UInt32, info.x::UInt32, newcomm::Ptr{MPI_Comm})::Int
-@inline MPI_Comm_create(comm::MPI_Comm, group::MPI_Group, newcomm::Ptr{MPI_Comm}) = @symbolcall MPI_Comm_create(comm.x::UInt32, group.x::UInt32, newcomm::Ptr{MPI_Comm})::Int
-@inline MPI_Comm_split(comm::MPI_Comm, color::Int, key::Int, newcomm::Ptr{MPI_Comm}) = @symbolcall MPI_Comm_split(comm.x::UInt32, color::Int, key::Int, newcomm::Ptr{MPI_Comm})::Int
-@inline MPI_Comm_free(comm::Ptr{MPI_Comm}) = @symbolcall MPI_Comm_free(comm::Ptr{MPI_Comm})::Int
-@inline MPI_Comm_test_inter(comm::MPI_Comm, flag::Ptr{Int}) = @symbolcall MPI_Comm_test_inter(comm.x::UInt32, flag::Ptr{Int})::Int
-@inline MPI_Comm_remote_size(comm::MPI_Comm, size::Ptr{Int}) = @symbolcall MPI_Comm_remote_size(comm.x::UInt32, size::Ptr{Int})::Int
-@inline MPI_Comm_remote_group(comm::MPI_Comm, group::Ptr{MPI_Group}) = @symbolcall MPI_Comm_remote_group(comm.x::UInt32, group::Ptr{MPI_Group})::Int
-@inline MPI_Intercomm_create(local_comm::MPI_Comm, local_leader::Int, peer_comm::MPI_Comm, remote_leader::Int, tag::Int, newintercomm::Ptr{MPI_Comm}) =
-   @symbolcall MPI_Intercomm_create(local_comm.x::UInt32, local_leader::Int, peer_comm.x::UInt32, remote_leader::Int, tag::Int, newintercomm::Ptr{MPI_Comm})::Int
-@inline MPI_Intercomm_merge(intercomm::MPI_Comm, high::Int, newintracomm::Ptr{MPI_Comm}) = @symbolcall MPI_Intercomm_merge(intercomm.x::UInt32, high::Int, newintracomm::Ptr{MPI_Comm})::Int
-
-@inline MPI_Group_size(group::MPI_Group, size::Ptr{Int}) = @symbolcall MPI_Group_size(group.x::UInt32, size::Ptr{Int})::Int
-@inline MPI_Group_rank(group::MPI_Group, rank::Ptr{Int}) = @symbolcall MPI_Group_rank(group.x::UInt32, rank::Ptr{Int})::Int
-@inline MPI_Group_translate_ranks(group1::MPI_Group, n::Int, ranks1::Ptr{Int}, group2::MPI_Group, ranks2::Ptr{Int}) =
-   @symbolcall MPI_Group_translate_ranks(group1.x::UInt32, n::Int, ranks1::Ptr{Int}, group2.x::UInt32, ranks2::Ptr{Int})::Int
-@inline MPI_Group_compare(group1::MPI_Group, group2::MPI_Group, result::Ptr{Int}) = @symbolcall MPI_Group_compare(group1.x::UInt32, group2.x::UInt32, result::Ptr{Int})::Int
-@inline MPI_Comm_group(comm::MPI_Comm, group::Ptr{MPI_Group}) = @symbolcall MPI_Group_compare(group1.x::UInt32, group2.x::UInt32, result::Ptr{Int})::Int
-@inline MPI_Group_union(group1::MPI_Group, group2::MPI_Group, newgroup::Ptr{MPI_Group}) = @symbolcall MPI_Group_union(group1.x::UInt32, group2.x::UInt32, newgroup::Ptr{MPI_Group})::Int
-@inline MPI_Group_intersection(group1::MPI_Group, group2::MPI_Group, newgroup::Ptr{MPI_Group}) = @symbolcall MPI_Group_intersection(group1.x::UInt32, group2.x::UInt32, newgroup::Ptr{MPI_Group})::Int
-@inline MPI_Group_difference(group1::MPI_Group, group2::MPI_Group, newgroup::Ptr{MPI_Group}) = @symbolcall MPI_Group_difference(group1.x::UInt32, group2.x::UInt32, newgroup::Ptr{MPI_Group})::Int
-@inline MPI_Group_incl(group::MPI_Group, n::Int, ranks::Ptr{Int}, newgroup::Ptr{MPI_Group}) = @symbolcall MPI_Group_incl(group.x::UInt32, n::Int, ranks::Ptr{Int}, newgroup::Ptr{MPI_Group})::Int
-@inline MPI_Group_excl(group::MPI_Group, n::Int, ranks::Ptr{Int}, newgroup::Ptr{MPI_Group}) = @symbolcall MPI_Group_excl(group.x::UInt32, n::Int, ranks::Ptr{Int}, newgroup::Ptr{MPI_Group})::Int
-@inline MPI_Group_range_incl(group::MPI_Group, n::Int, ranges::Ptr{Int}, newgroup::Ptr{MPI_Group}) = @symbolcall MPI_Group_range_incl(group.x::UInt32, n::Int, ranges::Ptr{Int}, newgroup::Ptr{MPI_Group})::Int
-@inline MPI_Group_range_excl(group::MPI_Group, n::Int, ranges::Ptr{Int}, newgroup::Ptr{MPI_Group}) = @symbolcall MPI_Group_range_excl(group.x::UInt32, n::Int, ranges::Ptr{Int}, newgroup::Ptr{MPI_Group})::Int
-@inline MPI_Group_free(group::Ptr{MPI_Group}) = @symbolcall MPI_Group_free(group::Ptr{MPI_Group})::Int
-
 @inline MPI_Reduce_local(inbuf::Ptr{Nothing}, inoutbuf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, op::MPI_Op) =
    @symbolcall  MPI_Reduce_local(inbuf::Ptr{Nothing}, inoutbuf::Ptr{Nothing}, count::Int, datatype.x::UInt32, op.x::UInt32)::Int
 @inline MPI_Op_commutative(op::MPI_Op, commute::Ptr{Int}) = @symbolcall MPI_Op_commutative(op.x::UInt32, commute::Ptr{Int})::Int
@@ -486,7 +456,43 @@ export mpitype
    @symbolcall @inline MPI_Dist_graph_neighbors(comm::MPI_Comm, maxindegree::Int, sources::Ptr{Int},
       sourceweights::Ptr{Int}, maxoutdegree::Int, destinations::Ptr{Int}, destweights::Ptr{Int})::Int
 
-# Matched probes:
+# Synchronization
+@inline MPI_Barrier(comm::MPI_Comm) = @symbolcall MPI_Barrier(comm.x::UInt32)::Int
+@inline MPI_Wait(request::Ptr{MPI_Request}, status::Ptr{MPI_Status}) =
+   @symbolcall MPI_Wait(request::Ptr{MPI_Request}, status::Ptr{MPI_Status})::Int
+@inline MPI_Waitany(count::Int, array_of_requests::Ptr{MPI_Request}, index::Ptr{Int}, status::Ptr{MPI_Status}) =
+   @symbolcall MPI_Waitany(count::Int, array_of_requests::Ptr{MPI_Request}, index::Ptr{Int}, status::Ptr{MPI_Status})::Int
+@inline MPI_Waitall(count::Int, array_of_requests::Ptr{MPI_Request}, array_of_statuses::Ptr{MPI_Status}) =
+   @symbolcall MPI_Waitall(count::Int, array_of_requests::Ptr{MPI_Request}, array_of_statuses::Ptr{MPI_Status})::Int
+@inline MPI_Waitsome(incount::Int, array_of_requests::Ptr{MPI_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status}) =
+   @symbolcall MPI_Waitsome(incount::Int, array_of_requests::Ptr{MPI_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
+
+@inline MPI_Test(request::Ptr{MPI_Request}, flag::Ptr{Int}, status::Ptr{MPI_Status}) =
+   @symbolcall MPI_Test(request::Ptr{MPI_Request}, flag::Ptr{Int}, status::Ptr{MPI_Status})::Int
+@inline MPI_Testany(count::Int, array_of_requests::Ptr{MPI_Request}, index::Ptr{Int}, flag::Ptr{Int}, status::Ptr{MPI_Status}) =
+   @symbolcall MPI_Testany(count::Int, array_of_requests::Ptr{MPI_Request}, index::Ptr{Int}, flag::Ptr{Int}, status::Ptr{MPI_Status})::Int
+@inline MPI_Testall(count::Int, array_of_requests::Ptr{MPI_Request}, flag::Ptr{Int}, array_of_statuses::Ptr{MPI_Status}) =
+   @symbolcall MPI_Testall(count::Int, array_of_requests::Ptr{MPI_Request}, flag::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
+@inline MPI_Testsome(incount::Int, array_of_requests::Ptr{MPI_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status}) =
+   @symbolcall MPI_Testsome(incount::Int, array_of_requests::Ptr{MPI_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
+@inline MPI_Test_cancelled(status::Ptr{MPI_Status}, flag::Ptr{Int}) =
+   @symbolcall MPI_Test_cancelled(status::Ptr{MPI_Status}, flag::Ptr{Int})::Int
+
+@inline MPI_Cancel(request::Ptr{MPI_Request}) =
+   @symbolcall MPI_Cancel(request::Ptr{MPI_Request})::Int
+@inline MPI_Request_free(request::Ptr{MPI_Request}) =
+   @symbolcall MPI_Request_free(request::Ptr{MPI_Request})::Int
+@inline MPI_Buffer_attach(buffer::Ptr{Nothing}, size::Int) =
+   @symbolcall MPI_Buffer_attach(buffer::Ptr{Nothing}, size::Int)::Int
+@inline MPI_Buffer_detach(buffer_addr::Ptr{Nothing}, size::Ptr{Int}) =
+   @symbolcall MPI_Buffer_attach(buffer::Ptr{Nothing}, size::Int)::Int
+
+
+# Probes:
+@inline MPI_Probe(source::Int, tag::Int, comm::MPI_Comm, status::Ptr{MPI_Status}) =
+   @symbolcall MPI_Probe(source::Int, tag::Int, comm.x::UInt32, status::Ptr{MPI_Status})::Int
+@inline MPI_Iprobe(source::Int, tag::Int, comm::MPI_Comm, flag::Ptr{Int}, status::Ptr{MPI_Status}) =
+   @symbolcall MPI_Iprobe(source::Int, tag::Int, comm.x::UInt32, flag::Ptr{Int}, status::Ptr{MPI_Status})::Int
 @inline MPI_Improbe(source::Int, tag::Int, comm::MPI_Comm, flag::Ptr{Int}, message::Ptr{MPI_Message}, status::Ptr{MPI_Status}) =
    @symbolcall MPI_Improbe(source::Int, tag::Int, comm.x::UInt32, flag::Ptr{Int}, message::Ptr{MPI_Message}, status::Ptr{MPI_Status})::Int
 @inline MPI_Imrecv(buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, message::Ptr{MPI_Message}, request::Ptr{MPI_Request}) =
@@ -562,7 +568,6 @@ export mpitype
    @symbolcall MPI_Iexscan(sendbuf::Ptr{Nothing}, recvbuf::Ptr{Nothing}, count::Int,
       datatype.x::UInt32, op.x::UInt32, comm.x::UInt32, request::Ptr{MPI_Request})::Int
 
-
 # Neighborhood collectives:
 @inline MPI_Ineighbor_allgather(sendbuf::Ptr{Nothing}, sendcount::Int, sendtype::MPI_Datatype,
    recvbuf::Ptr{Nothing}, recvcount::Int, recvtype::MPI_Datatype, comm::MPI_Comm, request::Ptr{MPI_Request}) =
@@ -605,9 +610,104 @@ export mpitype
    @symbolcall MPI_Neighbor_alltoallw(sendbuf::Ptr{Nothing}, sendcount::Ptr{Int}, sdispls::Ptr{MPI_Aint},sendtypes::Ptr{MPI_Datatype},
       recvbuf::Ptr{Nothing}, recvcount::Ptr{Int}, rdispls::Ptr{MPI_Aint}, recvtypes::Ptr{MPI_Datatype}, comm.x::UInt32)::Int
 
+# Noncollective communicator creation:
+@inline MPI_Comm_create_group(comm::MPI_Comm, group::MPI_Group, tag::Int, newcomm::Ptr{MPI_Comm}) =
+   @symbolcall MPI_Comm_create_group(comm.x::UInt32, group.x::UInt32, tag::Int, newcomm::Ptr{MPI_Comm})::Int
+
+# MPI_Aint addressing arithmetic:
+@inline MPI_Aint_add(base::MPI_Aint, disp::MPI_Aint) = @symbolcall MPI_Aint_add(base.x::UInt32, disp.x::UInt32)::Int
+@inline MPI_Aint_diff(addr1::MPI_Aint, addr2::MPI_Aint) = @symbolcall MPI_Aint_diff(addr1.x::UInt32, addr2.x::UInt32)::Int
+
+# Process Creation and Management:
+@inline MPI_Close_port(port_name::Ptr{UInt8}) = @symbolcall MPI_Close_port(port_name::Ptr{UInt8})::Int
+@inline MPI_Comm_accept(port_name::Ptr{UInt8}, info::MPI_Info, root::Int, comm::MPI_Comm, newcomm::Ptr{MPI_Comm}) =
+    @symbolcall MPI_Comm_accept(port_name::Ptr{UInt8}, info.x::UInt32, root::Int, comm.x::UInt32, newcomm::Ptr{MPI_Comm})::Int
+@inline MPI_Comm_connect(port_name::Ptr{UInt8}, info::MPI_Info, root::Int, comm::MPI_Comm, newcomm::Ptr{MPI_Comm}) =
+    @symbolcall MPI_Comm_connect(port_name::Ptr{UInt8}, info.x::UInt32, root::Int, comm.x::UInt32, newcomm::Ptr{MPI_Comm})::Int
+@inline MPI_Comm_disconnect(comm::Ptr{MPI_Comm}) = @symbolcall MPI_Comm_disconnect(comm::Ptr{MPI_Comm})::Int
+@inline MPI_Comm_get_parent(parent::Ptr{MPI_Comm}) = @symbolcall MPI_Comm_get_parent(parent::Ptr{MPI_Comm})::Int
+@inline MPI_Comm_join(fd::Int, intercomm::Ptr{MPI_Comm}) = @symbolcall MPI_Comm_join(fd::Int, intercomm::Ptr{MPI_Comm})::Int
+@inline MPI_Comm_spawn(command::Ptr{UInt8}, argv::Ptr{Ptr{UInt8}}, maxprocs::Int, info::MPI_Info, root::Int, comm::MPI_Comm, intercomm::Ptr{MPI_Comm}, array_of_errcodes::Ptr{Int32}) =
+    @symbolcall MPI_Comm_spawn(command::Ptr{UInt8}, argv::Ptr{Ptr{UInt8}}, maxprocs::Int, info.x::UInt32, root::Int, comm.x::UInt32, intercomm::Ptr{MPI_Comm}, array_of_errcodes::Ptr{Int32})::Int
+@inline MPI_Comm_spawn_multiple(count::Int, array_of_commands::Ptr{Ptr{UInt8}}, array_of_argv::Ptr{Ptr{Ptr{UInt8}}}, array_of_maxprocs::Ptr{Int32}, array_of_info::Ptr{MPI_Info}, root::Int, comm::MPI_Comm, intercomm::Ptr{MPI_Comm}, array_of_errcodes::Ptr{Int32}) =
+    @symbolcall MPI_Comm_spawn_multiple(count::Int, array_of_commands::Ptr{Ptr{UInt8}}, array_of_argv::Ptr{Ptr{Ptr{UInt8}}}, array_of_maxprocs::Ptr{Int32}, array_of_info::Ptr{MPI_Info}, root::Int, comm.x::UInt32, intercomm::Ptr{MPI_Comm}, array_of_errcodes::Ptr{Int32})::Int
+@inline MPI_Lookup_name(service_name::Ptr{UInt8}, info::MPI_Info, port_name::Ptr{UInt8}) =
+    @symbolcall MPI_Lookup_name(service_name::Ptr{UInt8}, info.x::UInt32, port_name::Ptr{UInt8})::Int
+@inline MPI_Open_port(info::MPI_Info, port_name::Ptr{UInt8}) =
+    @symbolcall MPI_Open_port(info.x::UInt32, port_name::Ptr{UInt8})::Int
+@inline MPI_Publish_name(service_name::Ptr{UInt8}, info::MPI_Info, port_name::Ptr{UInt8}) =
+    @symbolcall MPI_Publish_name(service_name::Ptr{UInt8}, info.x::UInt32, port_name::Ptr{UInt8})::Int
+@inline MPI_Unpublish_name(service_name::Ptr{UInt8}, info::MPI_Info, port_name::Ptr{UInt8}) =
+    @symbolcall MPI_Unpublish_name(service_name::Ptr{UInt8}, info.x::UInt32, port_name::Ptr{UInt8})::Int
+@inline MPI_Comm_set_info(comm::MPI_Comm, info::MPI_Info) = @symbolcall MPI_Comm_set_info(comm.x::UInt32, info.x::UInt32)::Int
+@inline MPI_Comm_get_info(comm::MPI_Comm, info::Ptr{MPI_Info}) = @symbolcall MPI_Comm_get_info(comm.x::UInt32, info::Ptr{MPI_Info})::Int
+
+# Non-standard but public extensions to MPI:
+@inline MPIX_Comm_failure_ack(comm::MPI_Comm) = @symbolcall MPIX_Comm_failure_ack(comm.x::UInt32)::Int
+@inline MPIX_Comm_failure_get_acked(comm::MPI_Comm, failedgrp::Ptr{MPI_Count}) = @symbolcall MPIX_Comm_failure_get_acked(comm.x::UInt32, failedgrp::Ptr{MPI_Count})::Int
+@inline MPIX_Comm_revoke(comm::MPI_Comm) = @symbolcall MPIX_Comm_revoke(comm.x::UInt32)::Int
+@inline MPIX_Comm_shrink(comm::MPI_Comm, newcomm::Ptr{MPI_Comm}) = @symbolcall MPIX_Comm_shrink(comm.x::UInt32, newcomm::Ptr{MPI_Comm})::Int
+@inline MPIX_Comm_agree(comm::MPI_Comm, flag::Ptr{Int}) = @symbolcall MPIX_Comm_agree(comm.x::UInt32, flag::Ptr{Int})::Int
+
 # Shared memory:
 @inline MPI_Comm_split_type(comm::MPI_Comm, split_type::Int, key::Int, info::MPI_Info, newcomm::Ptr{MPI_Comm}) =
    @symbolcall MPI_Comm_split_type(comm.x::UInt32, split_type::Int, key::Int, info.x::UInt32, newcomm::Ptr{MPI_Comm})::Int
+
+# One-Sided Communications:
+@inline MPI_Accumulate(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatype::MPI_Datatype, target_rank::Int, target_disp::MPI_Aint, target_count::Int, target_datatype::MPI_Datatype, op::MPI_Op, win::MPI_Win) =
+    @symbolcall MPI_Accumulate(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatype.x::UInt32, target_rank::Int, target_disp.x::UInt32, target_count::Int, target_datatype.x::UInt32, op.x::UInt32, win.x::UInt32)::Int
+@inline MPI_Get(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatype::MPI_Datatype, target_rank::Int, target_disp::MPI_Aint, target_count::Int, target_datatype::MPI_Datatype, win::MPI_Win) =
+    @symbolcall MPI_Get(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatype.x::UInt32, target_rank::Int, target_disp.x::UInt32, target_count::Int, target_datatype.x::UInt32, win.x::UInt32) =::Int
+@inline MPI_Put(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatype::MPI_Datatype, target_rank::Int, target_disp::MPI_Aint, target_count::Int, target_datatype::MPI_Datatype, win::MPI_Win) =
+    @symbolcall MPI_Put(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatype.x::UInt32, target_rank::Int, target_disp.x::UInt32, target_count::Int, target_datatype.x::UInt32, win.x::UInt32)::Int
+@inline MPI_Win_complete(win::MPI_Win) = @symbolcall MPI_Win_complete(win.x::UInt32)::Int
+@inline MPI_Win_create(base::Ptr{Nothing}, size::MPI_Aint, disp_unit::Int, info::MPI_Info, comm::MPI_Comm, win::Ptr{MPI_Win}) =
+    @symbolcall MPI_Win_create(base::Ptr{Nothing}, size.x::UInt32, disp_unit::Int, info.x::UInt32, comm.x::UInt32, win::Ptr{MPI_Win})::Int
+@inline MPI_Win_fence(assert::Int, win::MPI_Win) = @symbolcall MPI_Win_fence(assert::Int, win.x::UInt32)::Int
+@inline MPI_Win_free(win::Ptr{MPI_Win}) = @symbolcall MPI_Win_free(win::Ptr{MPI_Win})::Int
+@inline MPI_Win_get_group(win::MPI_Win, group::Ptr{MPI_Group}) = @symbolcall MPI_Win_get_group(win.x::UInt32, group::Ptr{MPI_Group})::Int
+@inline MPI_Win_lock(lock_type::Int, rank::Int, assert::Int, win::MPI_Win) = @symbolcall MPI_Win_lock(lock_type::Int, rank::Int, assert::Int, win.x::UInt32)::Int
+@inline MPI_Win_post(group::MPI_Group, assert::Int, win::MPI_Win) = @symbolcall MPI_Win_post(group.x::UInt32, assert::Int, win.x::UInt32)::Int
+@inline MPI_Win_start(group::MPI_Group, assert::Int, win::MPI_Win) = @symbolcall MPI_Win_start(group.x::UInt32, assert::Int, win.x::UInt32)::Int
+@inline MPI_Win_test(win::MPI_Win, flag::Ptr{Int32}) = @symbolcall MPI_Win_test(win.x::UInt32, flag::Ptr{Int32})::Int
+@inline MPI_Win_unlock(rank::Int, win::MPI_Win) = @symbolcall MPI_Win_unlock(rank::Int, win.x::UInt32)::Int
+@inline MPI_Win_wait(win::MPI_Win) = @symbolcall MPI_Win_wait(win.x::UInt32)::Int
+
+# MPI-3 One-Sided Communication Routines:
+@inline MPI_Win_allocate(size::MPI_Aint, disp_unit::Int, info::MPI_Info, comm::MPI_Comm, baseptr::Ptr{Nothing}, win::Ptr{MPI_Win}) =
+    @symbolcall MPI_Win_allocate(size.x::UInt32, disp_unit::Int, info.x::UInt32, comm.x::UInt32, baseptr::Ptr{Nothing}, win::Ptr{MPI_Win})::Int
+@inline MPI_Win_allocate_shared(size::MPI_Aint, disp_unit::Int, info::MPI_Info, comm::MPI_Comm, baseptr::Ptr{Nothing}, win::Ptr{MPI_Win}) =
+    @symbolcall MPI_Win_allocate_shared(size.x::UInt32, disp_unit::Int, info.x::UInt32, comm.x::UInt32, baseptr::Ptr{Nothing}, win::Ptr{MPI_Win})::Int
+@inline MPI_Win_shared_query(win::MPI_Win, rank::Int, MPI_Asize::Ptr{Int32}, disp_unit::Ptr{Int32}, baseptr::Ptr{Nothing}) =
+    @symbolcall MPI_Win_shared_query(win.x::UInt32, rank::Int, MPI_Asize::Ptr{Int32}, disp_unit::Ptr{Int32}, baseptr::Ptr{Nothing})::Int
+@inline MPI_Win_create_dynamic(info::MPI_Info, comm::MPI_Comm, win::Ptr{MPI_Win}) =
+    @symbolcall MPI_Win_create_dynamic(info.x::UInt32, comm.x::UInt32, win::Ptr{MPI_Win})::Int
+@inline MPI_Win_attach(win::MPI_Win, base::Ptr{Nothing}, size::MPI_Aint) =
+    @symbolcall MPI_Win_attach(win.x::UInt32, base::Ptr{Nothing}, size.x::UInt32)::Int
+@inline MPI_Win_detach(win::MPI_Win, base::Ptr{Nothing}) = @symbolcall MPI_Win_detach(win.x::UInt32, base::Ptr{Nothing})::Int
+@inline MPI_Win_get_info(win::MPI_Win, info_used::Ptr{MPI_Info}) = @symbolcall MPI_Win_get_info(win.x::UInt32, info_used::Ptr{MPI_Info})::Int
+@inline MPI_Win_set_info(win::MPI_Win, info::MPI_Info) = @symbolcall MPI_Win_set_info(win.x::UInt32, info.x::UInt32)::Int
+@inline MPI_Get_accumulate(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatype::MPI_Datatype, result_addr::Ptr{Nothing}, result_count::Int, result_datatype::MPI_Datatype, target_rank::Int, target_disp::MPI_Aint, target_count::Int, target_datatype::MPI_Datatype, op::MPI_Op, win::MPI_Win) =
+    @symbolcall MPI_Get_accumulate(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatype.x::UInt32, result_addr::Ptr{Nothing}, result_count::Int, result_datatype.x::UInt32, target_rank::Int, target_disp.x::UInt32, target_count::Int, target_datatype.x::UInt32, op.x::UInt32, win.x::UInt32)::Int
+@inline MPI_Fetch_and_op(origin_addr::Ptr{Nothing}, result_addr::Ptr{Nothing}, datatype::MPI_Datatype, target_rank::Int, target_disp::MPI_Aint, op::MPI_Op, win::MPI_Win) =
+    @symbolcall MPI_Fetch_and_op(origin_addr::Ptr{Nothing}, result_addr::Ptr{Nothing}, datatypewin.x::UInt32, target_rank::Int, target_disp.x::UInt32, op.x::UInt32, win.x::UInt32)::Int
+@inline MPI_Compare_and_swap(origin_addr::Ptr{Nothing}, compare_addr::Ptr{Nothing}, result_addr::Ptr{Nothing}, datatype::MPI_Datatype, target_rank::Int, target_disp::MPI_Aint, win::MPI_Win) =
+    @symbolcall MPI_Compare_and_swap(origin_addr::Ptr{Nothing}, compare_addr::Ptr{Nothing}, result_addr::Ptr{Nothing}, datatypewin.x::UInt32, target_rank::Int, target_disp.x::UInt32, win.x::UInt32)::Int
+@inline MPI_Rput(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatype::MPI_Datatype, target_rank::Int, target_disp::MPI_Aint, target_count::Int, target_datatype::MPI_Datatype, win::MPI_Win, request::Ptr{MPI_Request}) =
+    @symbolcall MPI_Rput(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatypewin.x::UInt32, target_rank::Int, target_disp.x::UInt32, target_count::Int, target_datatypewin.x::UInt32, win.x::UInt32, request::Ptr{MPI_Request})::Int
+@inline MPI_Rget(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatype::MPI_Datatype, target_rank::Int, target_disp::MPI_Aint, target_count::Int, target_datatype::MPI_Datatype, win::MPI_Win, request::Ptr{MPI_Request}) =
+    @symbolcall MPI_Rget(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatypewin.x::UInt32, target_rank::Int, target_disp.x::UInt32, target_count::Int, target_datatypewin.x::UInt32, win.x::UInt32, request::Ptr{MPI_Request})::Int
+@inline MPI_Raccumulate(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatype::MPI_Datatype, target_rank::Int, target_disp::MPI_Aint, target_count::Int, target_datatype::MPI_Datatype, op::MPI_Op, win::MPI_Win, request::Ptr{MPI_Request}) =
+    @symbolcall MPI_Raccumulate(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatypewin.x::UInt32, target_rank::Int, target_disp.x::UInt32, target_count::Int, target_datatypewin.x::UInt32, op.x::UInt32, win.x::UInt32, request::Ptr{MPI_Request})::Int
+@inline MPI_Rget_accumulate(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatype::MPI_Datatype, result_addr::Ptr{Nothing}, result_count::Int, result_datatype::MPI_Datatype, target_rank::Int, target_disp::MPI_Aint, target_count::Int, target_datatype::MPI_Datatype, op::MPI_Op, win::MPI_Win, request::Ptr{MPI_Request}) =
+    @symbolcall MPI_Rget_accumulate(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatypeinfo_used::Ptr{MPI_Info}, result_addr::Ptr{Nothing}, result_count::Int, result_datatypeinfo_used::Ptr{MPI_Info}, target_rank::Int, target_disp.x::UInt32, target_count::Int, target_datatypeinfo_used::Ptr{MPI_Info}, op.x::UInt32, win.x::UInt32, request::Ptr{MPI_Request})::Int
+@inline MPI_Win_lock_all(assert::Int, win::MPI_Win) = @symbolcall MPI_Win_lock_all(assert::Int, win.x::UInt32)::Int
+@inline MPI_Win_unlock_all(win::MPI_Win) = @symbolcall MPI_Win_unlock_all(win.x::UInt32)::Int
+@inline MPI_Win_flush(rank::Int, win::MPI_Win) = @symbolcall MPI_Win_flush(rank::Int, win.x::UInt32)::Int
+@inline MPI_Win_flush_all(win::MPI_Win) = @symbolcall MPI_Win_flush_all(win.x::UInt32)::Int
+@inline MPI_Win_flush_local(rank::Int, win::MPI_Win) = @symbolcall MPI_Win_flush_local(rank::Int, win.x::UInt32)::Int
+@inline MPI_Win_flush_local_all(win::MPI_Win) = @symbolcall MPI_Win_flush_local_all(win.x::UInt32)::Int
+@inline MPI_Win_sync(win::MPI_Win) = @symbolcall MPI_Win_sync(win.x::UInt32)::Int
 
 # MPI-3 "large count" routines:
 @inline MPI_Get_elements_x(status::Ptr{MPI_Status}, datatype::MPI_Datatype, count::Ptr{MPI_Count}) =
@@ -621,20 +721,6 @@ export mpitype
 @inline MPI_Type_size_x(datatype::MPI_Datatype, size::Ptr{MPI_Count}) =
    @symbolcall MPI_Type_size_x(datatype.x::UInt32, size::Ptr{MPI_Count})::Int
 
-# Noncollective communicator creation:
-@inline MPI_Comm_create_group(comm::MPI_Comm, group::MPI_Group, tag::Int, newcomm::Ptr{MPI_Comm}) =
-   @symbolcall MPI_Comm_create_group(comm.x::UInt32, group.x::UInt32, tag::Int, newcomm::Ptr{MPI_Comm})::Int
-
-# MPI_Aint addressing arithmetic:
-@inline MPI_Aint_add(base::MPI_Aint, disp::MPI_Aint) = @symbolcall MPI_Aint_add(base.x::UInt32, disp.x::UInt32)::Int
-@inline MPI_Aint_diff(addr1::MPI_Aint, addr2::MPI_Aint) = @symbolcall MPI_Aint_diff(addr1.x::UInt32, addr2.x::UInt32)::Int
-
-# Non-standard but public extensions to MPI:
-@inline MPIX_Comm_failure_ack(comm::MPI_Comm) = @symbolcall MPIX_Comm_failure_ack(comm.x::UInt32)::Int
-@inline MPIX_Comm_failure_get_acked(comm::MPI_Comm, failedgrp::Ptr{MPI_Count}) = @symbolcall MPIX_Comm_failure_get_acked(comm.x::UInt32, failedgrp::Ptr{MPI_Count})::Int
-@inline MPIX_Comm_revoke(comm::MPI_Comm) = @symbolcall MPIX_Comm_revoke(comm.x::UInt32)::Int
-@inline MPIX_Comm_shrink(comm::MPI_Comm, newcomm::Ptr{MPI_Comm}) = @symbolcall MPIX_Comm_shrink(comm.x::UInt32, newcomm::Ptr{MPI_Comm})::Int
-@inline MPIX_Comm_agree(comm::MPI_Comm, flag::Ptr{Int}) = @symbolcall MPIX_Comm_agree(comm.x::UInt32, flag::Ptr{Int})::Int
 
 # GPU extensions:
 const MPIX_GPU_SUPPORT_CUDA  = 0
