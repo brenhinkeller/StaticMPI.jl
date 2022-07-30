@@ -6,6 +6,7 @@ using MPICH_jll
 
     @test MPICH_jll.is_available()
     @static if MPICH_jll.is_available()
+    @test MPI_Init() == MPI_SUCCESS # Check that we have loaded libmpi
 
     let
         status = -1

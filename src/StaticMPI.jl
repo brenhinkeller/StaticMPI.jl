@@ -1,7 +1,19 @@
 module StaticMPI
 
     using StaticTools
+    using MPICH_jll
+    using Libdl
+
     const Buffer{T} = Union{AbstractArray{T}, Ref{T}}
+    const libmpiptr = Ref(C_NULL)
+    function __init__()
+        # Check if any libmpi is already loaded
+        if ccall(:dlsym, Ptr{Cvoid}, (Ptr{UInt8}, Cstring), Ptr{UInt8}(-2 % UInt), "MPI_Init") == C_NULL
+            # If not, load
+            path_to_libmpi = joinpath(first(splitdir(MPICH_jll.PATH[])), "lib", "libmpi")
+            libmpiptr[] = Libdl.dlopen(path_to_libmpi, RTLD_GLOBAL)
+        end
+    end
 
     include("mpich.jl")
     export Mpich
