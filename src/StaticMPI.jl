@@ -8,8 +8,8 @@ module StaticMPI
     const libmpiptr = Ref(C_NULL)
     function __init__()
         # Check if any libmpi is already loaded
-        RTLD_DEFAULT = Sys.isapple() ? Ptr{Nothing}(-2 % UInt) : C_NULL
-        if ccall(:dlsym, Ptr{Cvoid}, (Ptr{Nothing}, Cstring), RTLD_DEFAULT, "MPI_Init") == C_NULL
+        handle = Ptr{Nothing}(StaticTools.RTLD_DEFAULT)
+        if ccall(:dlsym, Ptr{Cvoid}, (Ptr{Nothing}, Cstring), handle, "MPI_Init") == C_NULL
             # If not, load
             path_to_libmpi = joinpath(first(splitdir(MPICH_jll.PATH[])), "lib", "libmpi")
             libmpiptr[] = Libdl.dlopen(path_to_libmpi, RTLD_GLOBAL)
