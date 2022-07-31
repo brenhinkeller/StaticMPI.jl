@@ -19,17 +19,19 @@ is still relatively incomplete and under active development.
 
 Note that the functions herein insert LLVM IR that directly calls functions from libmpi.
 As such, they will only work when linked against a valid libmpi during compilation.
-If you want to use them interactively in the REPL (e.g., for debugging), you will
-have to first `dlopen` your libmpi with mode `RTLD_GLOBAL` to make the symbols
-from libmpi available within your Julia session:
+If you want to use them interactively in the REPL (e.g., for debugging), a valid
+libmpi must first have been `dlopen`ed with mode `RTLD_GLOBAL`. By default,
+StaticMPI will attempt to automatically `dlopen` (on init) the libmpi from
+[MPICH_jll.jl](https://github.com/JuliaBinaryWrappers/MPICH_jll.jl).
+If you want to use a different libmpi interactively, just `dlopen` it *before*
+`using StaticMPI`
 ```julia
-julia> using Libdl, MPICH_jll, StaticMPI
+julia> using Libdl
 
-julia> path_to_libmpi = joinpath(first(splitdir(MPICH_jll.PATH[])), "lib", "libmpi")
-"/Users/me/.julia/artifacts/10a7002eea557072e8e2ec81f16de1421d5bf667/lib/libmpi"
+julia> dlopen("/opt/local/lib/mpich-mp/libmpi", RTLD_GLOBAL)
+Ptr{Nothing} @0x00007fd5c4c40f40
 
-julia> dlopen(path_to_libmpi, RTLD_GLOBAL)
-Ptr{Nothing} @0x00007fa51443bbe0
+julia> using StaticMPI
 
 julia> MPI_Init() == MPI_SUCCESS
 true
