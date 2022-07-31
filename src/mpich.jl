@@ -618,6 +618,43 @@ export mpitype
 @inline MPI_Aint_add(base::MPI_Aint, disp::MPI_Aint) = @symbolcall MPI_Aint_add(base.x::UInt32, disp.x::UInt32)::Int
 @inline MPI_Aint_diff(addr1::MPI_Aint, addr2::MPI_Aint) = @symbolcall MPI_Aint_diff(addr1.x::UInt32, addr2.x::UInt32)::Int
 
+# Type-related functions
+@inline MPI_Type_contiguous(count::Int, oldtype::MPI_Datatype, newtype::Ptr{MPI_Datatype}) =
+    @symbolcall MPI_Type_contiguous(count::Int, oldtype.x::UInt32, newtype::Ptr{MPI_Datatype})::Int
+@inline MPI_Type_vector(count::Int, blocklength::Int, stride::Int, oldtype::MPI_Datatype, newtype::Ptr{MPI_Datatype}) =
+    @symbolcall MPI_Type_vector(count::Int, blocklength::Int, stride::Int, oldtype.x::UInt32, newtype::Ptr{MPI_Datatype})::Int
+@inline MPI_Type_hvector(count::Int, blocklength::Int, stride::MPI_Aint, oldtype::MPI_Datatype, newtype::Ptr{MPI_Datatype}) =
+    @symbolcall MPI_Type_hvector(count::Int, blocklength::Int, stride.x::UInt32, oldtype.x::UInt32, newtype::Ptr{MPI_Datatype})::Int
+@inline MPI_Type_indexed(count::Int, array_of_blocklengths::Ptr{Int32}, array_of_displacements::Ptr{Int32}, oldtype::MPI_Datatype, newtype::Ptr{MPI_Datatype}) =
+    @symbolcall MPI_Type_indexed(count::Int, array_of_blocklengths::Ptr{Int32}, array_of_displacements::Ptr{Int32}, oldtype.x::UInt32, newtype::Ptr{MPI_Datatype})::Int
+@inline MPI_Type_hindexed(count::Int, array_of_blocklengths::Ptr{Int32}, array_of_displacements::Ptr{MPI_Aint}, oldtype::MPI_Datatype, newtype::Ptr{MPI_Datatype}) =
+    @symbolcall MPI_Type_hindexed(count::Int, array_of_blocklengths::Ptr{Int32}, array_of_displacements::Ptr{MPI_Aint}, oldtype.x::UInt32, newtype::Ptr{MPI_Datatype})::Int
+@inline MPI_Type_struct(count::Int, array_of_blocklengths::Ptr{Int32}, array_of_displacements::Ptr{MPI_Aint}, array_of_types::Ptr{MPI_Datatype}, newtype::Ptr{MPI_Datatype}) =
+    @symbolcall MPI_Type_struct(count::Int, array_of_blocklengths::Ptr{Int32}, array_of_displacements::Ptr{MPI_Aint}, array_of_types::Ptr{MPI_Datatype}, newtype::Ptr{MPI_Datatype})::Int
+@inline MPI_Address(location::Ptr{Nothing}, address::Ptr{MPI_Aint}) =
+    @symbolcall MPI_Address(location::Ptr{Nothing}, address::Ptr{MPI_Aint})::Int
+@inline MPI_Type_extent(datatype::MPI_Datatype, extent::Ptr{MPI_Aint}) =
+    @symbolcall MPI_Type_extent(datatype.x::UInt32, extent::Ptr{MPI_Aint})::Int
+@inline MPI_Type_size(datatype::MPI_Datatype, size::Ptr{Int32}) =
+    @symbolcall MPI_Type_size(datatype.x::UInt32, size::Ptr{Int32})::Int
+@inline MPI_Type_lb(datatype::MPI_Datatype, displacement::Ptr{MPI_Aint}) =
+    @symbolcall MPI_Type_lb(datatype.x::UInt32, displacement::Ptr{MPI_Aint})::Int
+@inline MPI_Type_ub(datatype::MPI_Datatype, displacement::Ptr{MPI_Aint}) =
+    @symbolcall MPI_Type_ub(datatype.x::UInt32, displacement::Ptr{MPI_Aint})::Int
+@inline MPI_Type_commit(datatype::Ptr{MPI_Datatype}) =
+    @symbolcall MPI_Type_commit(datatype::Ptr{MPI_Datatype})::Int
+@inline MPI_Type_free(datatype::Ptr{MPI_Datatype}) =
+    @symbolcall MPI_Type_free(datatype::Ptr{MPI_Datatype})::Int
+@inline MPI_Get_elements(status::Ptr{MPI_Status}, datatype::MPI_Datatype, count::Ptr{Int32}) =
+    @symbolcall MPI_Get_elements(status::Ptr{MPI_Status}, datatype.x::UInt32, count::Ptr{Int32})::Int
+@inline MPI_Pack(inbuf::Ptr{Nothing}, incount::Int, datatype::MPI_Datatype, outbuf::Ptr{Nothing}, outsize::Int, position::Ptr{Int32}, comm::MPI_Comm) =
+    @symbolcall MPI_Pack(inbuf::Ptr{Nothing}, incount::Int, datatype.x::UInt32, outbuf::Ptr{Nothing}, outsize::Int, position::Ptr{Int32}, comm.x::UInt32)::Int
+@inline MPI_Unpack(inbuf::Ptr{Nothing}, insize::Int, position::Ptr{Int32}, outbuf::Ptr{Nothing}, outcount::Int, datatype::MPI_Datatype, comm::MPI_Comm) =
+    @symbolcall MPI_Unpack(inbuf::Ptr{Nothing}, insize::Int, position::Ptr{Int32}, outbuf::Ptr{Nothing}, outcount::Int, datatype.x::UInt32, comm.x::UInt32)::Int
+@inline MPI_Pack_size(incount::Int, datatype::MPI_Datatype, comm::MPI_Comm, size::Ptr{Int32}) =
+    @symbolcall MPI_Pack_size(incount::Int, datatype.x::UInt32, comm.x::UInt32, size::Ptr{Int32})::Int
+
+
 # Process Creation and Management:
 @inline MPI_Close_port(port_name::Ptr{UInt8}) = @symbolcall MPI_Close_port(port_name::Ptr{UInt8})::Int
 @inline MPI_Comm_accept(port_name::Ptr{UInt8}, info::MPI_Info, root::Int, comm::MPI_Comm, newcomm::Ptr{MPI_Comm}) =
@@ -722,13 +759,6 @@ export mpitype
    @symbolcall MPI_Type_size_x(datatype.x::UInt32, size::Ptr{MPI_Count})::Int
 
 
-# GPU extensions:
-const MPIX_GPU_SUPPORT_CUDA  = 0
-const MPIX_GPU_SUPPORT_ZE    = 1
-const MPIX_GPU_SUPPORT_HIP   = 2
-@inline MPIX_GPU_query_support(gpu_type::Int, is_supported::Ptr{Int}) = MPIX_GPU_query_support(gpu_type::Int, is_supported::Ptr{Int})::Int
-@inline MPIX_Query_cuda_support() = @symbolcall MPIX_Query_cuda_support()::Int
-
 # Files and IO
 @inline MPI_File_open(comm::MPI_Comm, filename::Ptr{UInt8}, amode::Int, info::MPI_Info, fh::Ptr{MPI_File}) =
 	@symbolcall MPI_File_open(comm.x::UInt32, filename::Ptr{UInt8}, amode::Int, info.x::UInt32, fh::Ptr{MPI_File})::Int
@@ -830,5 +860,11 @@ const MPIX_GPU_SUPPORT_HIP   = 2
 @inline MPI_File_get_atomicity(file::MPI_File, flag::Ptr{Int}) = @symbolcall MPI_File_get_atomicity(file.x::Ptr{UInt8}, flag::Ptr{Int})::Int
 @inline MPI_File_sync(file::MPI_File) = @symbolcall MPI_File_sync(file.x::Ptr{UInt8})::Int
 
+# GPU extensions:
+const MPIX_GPU_SUPPORT_CUDA  = 0
+const MPIX_GPU_SUPPORT_ZE    = 1
+const MPIX_GPU_SUPPORT_HIP   = 2
+@inline MPIX_GPU_query_support(gpu_type::Int, is_supported::Ptr{Int}) = MPIX_GPU_query_support(gpu_type::Int, is_supported::Ptr{Int})::Int
+@inline MPIX_Query_cuda_support() = @symbolcall MPIX_Query_cuda_support()::Int
 
 end # module
