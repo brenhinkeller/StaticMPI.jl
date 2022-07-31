@@ -10,9 +10,12 @@ module StaticMPI
         # Check if any libmpi is already loaded
         handle = Ptr{Nothing}(StaticTools.RTLD_DEFAULT)
         if ccall(:dlsym, Ptr{Cvoid}, (Ptr{Nothing}, Cstring), handle, "MPI_Init") == C_NULL
-            # If not, load
-            path_to_libmpi = joinpath(first(splitdir(MPICH_jll.PATH[])), "lib", "libmpi")
-            libmpiptr[] = Libdl.dlopen(path_to_libmpi, RTLD_GLOBAL)
+            if MPICH_jll.is_available()
+                # If not, load
+                path_to_libmpi = joinpath(first(splitdir(MPICH_jll.PATH[])), "lib", "libmpi")
+                libmpiptr[] = Libdl.dlopen(path_to_libmpi, RTLD_GLOBAL)
+                (libmpiptr[] == C_NULL) && @warn "Could not load MPICH_JLL libmpi"
+            end
         end
     end
 

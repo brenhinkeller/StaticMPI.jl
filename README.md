@@ -36,7 +36,8 @@ julia> using StaticMPI
 julia> MPI_Init() == MPI_SUCCESS
 true
 ```
-If any MPI functions herein are ever called *without* linking to libmpi one way or another, expect segfaults!
+If any MPI functions herein were somehow ever called *without* linking to libmpi
+one way or another, expect segfaults!
 
 ## Examples
 #### Hello World:
