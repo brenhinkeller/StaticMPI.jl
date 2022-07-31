@@ -290,6 +290,7 @@ export mpitype
 @inline MPI_Finalize() = @symbolcall MPI_Finalize()::Int
 @inline MPI_Initialized(flag::Ptr{Int}) = @symbolcall MPI_Initialized(flag::Ptr{Int})::Int
 @inline MPI_Abort(comm::MPI_Comm, errorcode::Int) = @symbolcall MPI_Abort(comm.x::UInt32, errorcode::Int)::Int
+@inline MPI_Finalized(flag::Ptr{Int32}) = @symbolcall MPI_Free_mem(ptr::Ptr{Nothing})::Int
 
 # MPI Communicators
 @inline MPI_Comm_size(comm::MPI_Comm, size::Ptr{Int}) = @symbolcall MPI_Comm_size(comm.x::UInt32, size::Ptr{Int})::Int
@@ -303,6 +304,8 @@ export mpitype
 @inline MPI_Comm_test_inter(comm::MPI_Comm, flag::Ptr{Int}) = @symbolcall MPI_Comm_test_inter(comm.x::UInt32, flag::Ptr{Int})::Int
 @inline MPI_Comm_remote_size(comm::MPI_Comm, size::Ptr{Int}) = @symbolcall MPI_Comm_remote_size(comm.x::UInt32, size::Ptr{Int})::Int
 @inline MPI_Comm_remote_group(comm::MPI_Comm, group::Ptr{MPI_Group}) = @symbolcall MPI_Comm_remote_group(comm.x::UInt32, group::Ptr{MPI_Group})::Int
+@inline MPI_Comm_split_type(comm::MPI_Comm, split_type::Int, key::Int, info::MPI_Info, newcomm::Ptr{MPI_Comm}) =
+   @symbolcall MPI_Comm_split_type(comm.x::UInt32, split_type::Int, key::Int, info.x::UInt32, newcomm::Ptr{MPI_Comm})::Int
 @inline MPI_Intercomm_create(local_comm::MPI_Comm, local_leader::Int, peer_comm::MPI_Comm, remote_leader::Int, tag::Int, newintercomm::Ptr{MPI_Comm}) =
    @symbolcall MPI_Intercomm_create(local_comm.x::UInt32, local_leader::Int, peer_comm.x::UInt32, remote_leader::Int, tag::Int, newintercomm::Ptr{MPI_Comm})::Int
 @inline MPI_Intercomm_merge(intercomm::MPI_Comm, high::Int, newintracomm::Ptr{MPI_Comm}) = @symbolcall MPI_Intercomm_merge(intercomm.x::UInt32, high::Int, newintracomm::Ptr{MPI_Comm})::Int
@@ -361,7 +364,6 @@ export mpitype
    @symbolcall MPI_Sendrecv_replace(buf::Ptr{Nothing}, count::Int, datatype.x::UInt32,
       dest::Int, sendtag::Int, source::Int, recvtag::Int, comm.x::UInt32,
       status::Ptr{MPI_Status})::Int
-
 
 @inline MPI_Send_init(buf::Ptr{Nothing}, count::Int, datatype::MPI_Datatype, dest::Int, tag::Int, comm::MPI_Comm, request::Ptr{MPI_Request}) =
    @symbolcall MPI_Send_init(buf::Ptr{Nothing}, count::Int, datatype.x::UInt32, dest::Int, tag::Int, comm.x::UInt32, request::Ptr{MPI_Request})::Int
@@ -456,7 +458,7 @@ export mpitype
    @symbolcall @inline MPI_Dist_graph_neighbors(comm::MPI_Comm, maxindegree::Int, sources::Ptr{Int},
       sourceweights::Ptr{Int}, maxoutdegree::Int, destinations::Ptr{Int}, destweights::Ptr{Int})::Int
 
-# Synchronization
+# Synchronization: wait until request[s] completed
 @inline MPI_Barrier(comm::MPI_Comm) = @symbolcall MPI_Barrier(comm.x::UInt32)::Int
 @inline MPI_Wait(request::Ptr{MPI_Request}, status::Ptr{MPI_Status}) =
    @symbolcall MPI_Wait(request::Ptr{MPI_Request}, status::Ptr{MPI_Status})::Int
@@ -467,6 +469,7 @@ export mpitype
 @inline MPI_Waitsome(incount::Int, array_of_requests::Ptr{MPI_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status}) =
    @symbolcall MPI_Waitsome(incount::Int, array_of_requests::Ptr{MPI_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
 
+# Test whether execution of a request[s] completed
 @inline MPI_Test(request::Ptr{MPI_Request}, flag::Ptr{Int}, status::Ptr{MPI_Status}) =
    @symbolcall MPI_Test(request::Ptr{MPI_Request}, flag::Ptr{Int}, status::Ptr{MPI_Status})::Int
 @inline MPI_Testany(count::Int, array_of_requests::Ptr{MPI_Request}, index::Ptr{Int}, flag::Ptr{Int}, status::Ptr{MPI_Status}) =
@@ -686,9 +689,11 @@ export mpitype
 @inline MPIX_Comm_shrink(comm::MPI_Comm, newcomm::Ptr{MPI_Comm}) = @symbolcall MPIX_Comm_shrink(comm.x::UInt32, newcomm::Ptr{MPI_Comm})::Int
 @inline MPIX_Comm_agree(comm::MPI_Comm, flag::Ptr{Int}) = @symbolcall MPIX_Comm_agree(comm.x::UInt32, flag::Ptr{Int})::Int
 
-# Shared memory:
-@inline MPI_Comm_split_type(comm::MPI_Comm, split_type::Int, key::Int, info::MPI_Info, newcomm::Ptr{MPI_Comm}) =
-   @symbolcall MPI_Comm_split_type(comm.x::UInt32, split_type::Int, key::Int, info.x::UInt32, newcomm::Ptr{MPI_Comm})::Int
+# Memory management:
+@inline MPI_Alloc_mem(size::MPI_Aint, info::MPI_Info, ptr::Ptr{Nothing}) =
+    @symbolcall MPI_Alloc_mem(size.x::UInt32, info.x::UInt32, ptr::Ptr{Nothing})::Int
+@inline MPI_Free_mem(base::Ptr{Nothing}) = @symbolcall MPI_Free_mem(ptr::Ptr{Nothing})::Int
+
 
 # One-Sided Communications:
 @inline MPI_Accumulate(origin_addr::Ptr{Nothing}, origin_count::Int, origin_datatype::MPI_Datatype, target_rank::Int, target_disp::MPI_Aint, target_count::Int, target_datatype::MPI_Datatype, op::MPI_Op, win::MPI_Win) =
@@ -866,5 +871,58 @@ const MPIX_GPU_SUPPORT_ZE    = 1
 const MPIX_GPU_SUPPORT_HIP   = 2
 @inline MPIX_GPU_query_support(gpu_type::Int, is_supported::Ptr{Int}) = MPIX_GPU_query_support(gpu_type::Int, is_supported::Ptr{Int})::Int
 @inline MPIX_Query_cuda_support() = @symbolcall MPIX_Query_cuda_support()::Int
+
+# Various utility functions
+@inline MPI_Attr_put(comm::MPI_Comm, keyval::Int, attribute_val::Ptr{Nothing}) =
+    @symbolcall MPI_Attr_put(comm.x::UInt32, keyval::Int, attribute_val::Ptr{Nothing})::Int
+@inline MPI_Attr_get(comm::MPI_Comm, keyval::Int, attribute_val::Ptr{Nothing}, flag::Ptr{Int32}) =
+    @symbolcall MPI_Attr_get(comm.x::UInt32, keyval::Int, attribute_val::Ptr{Nothing}, flag::Ptr{Int32})::Int
+@inline MPI_Attr_delete(comm::MPI_Comm, keyval::Int) =
+    @symbolcall MPI_Attr_delete(comm.x::UInt32, keyval::Int)::Int
+@inline MPI_Topo_test(comm::MPI_Comm, status::Ptr{Int32}) =
+    @symbolcall MPI_Topo_test(comm.x::UInt32, status::Ptr{Int32})::Int
+@inline MPI_Cart_create(comm_old::MPI_Comm, ndims::Int, dims::Ptr{Int32}, periods::Ptr{Int32}, reorder::Int, comm_cart::Ptr{MPI_Comm}) =
+    @symbolcall MPI_Cart_create(comm_old.x::UInt32, ndims::Int, dims::Ptr{Int32}, periods::Ptr{Int32}, reorder::Int, comm_cart::Ptr{MPI_Comm})::Int
+@inline MPI_Dims_create(nnodes::Int, ndims::Int, dims::Ptr{Int32}) =
+    @symbolcall MPI_Dims_create(nnodes::Int, ndims::Int, dims::Ptr{Int32})::Int
+@inline MPI_Graph_create(comm_old::MPI_Comm, nnodes::Int, indx::Ptr{Int32}, edges::Ptr{Int32}, reorder::Int, comm_graph::Ptr{MPI_Comm}) =
+    @symbolcall MPI_Graph_create(comm_old.x::UInt32, nnodes::Int, indx::Ptr{Int32}, edges::Ptr{Int32}, reorder::Int, comm_graph::Ptr{MPI_Comm})::Int
+@inline MPI_Graphdims_get(comm::MPI_Comm, nnodes::Ptr{Int32}, nedges::Ptr{Int32}) =
+    @symbolcall MPI_Graphdims_get(comm.x::UInt32, nnodes::Ptr{Int32}, nedges::Ptr{Int32})::Int
+@inline MPI_Graph_get(comm::MPI_Comm, maxindex::UInt32, maxedges::Int, indx::Ptr{Int32}, edges::Ptr{Int32}) =
+    @symbolcall MPI_Graph_get(comm.x::UInt32, maxindex::UInt32, maxedges::Int, indx::Ptr{Int32}, edges::Ptr{Int32})::Int
+@inline MPI_Cartdim_get(comm::MPI_Comm, ndims::Ptr{Int32}) =
+    @symbolcall MPI_Cartdim_get(comm.x::UInt32, ndims::Ptr{Int32})::Int
+@inline MPI_Cart_get(comm::MPI_Comm, maxdims::Int, dims::Ptr{Int32}, periods::Ptr{Int32}, coords::Ptr{Int32}) =
+    @symbolcall MPI_Cart_get(comm.x::UInt32, maxdims::Int, dims::Ptr{Int32}, periods::Ptr{Int32}, coords::Ptr{Int32})::Int
+@inline MPI_Cart_rank(comm::MPI_Comm, coords::Ptr{Int32}, rank::Ptr{Int32}) =
+    @symbolcall MPI_Cart_rank(comm.x::UInt32, coords::Ptr{Int32}, rank::Ptr{Int32})::Int
+@inline MPI_Cart_coords(comm::MPI_Comm, rank::Int, maxdims::Int, coords::Ptr{Int32}) =
+    @symbolcall MPI_Cart_coords(comm.x::UInt32, rank::Int, maxdims::Int, coords::Ptr{Int32})::Int
+@inline MPI_Graph_neighbors_count(comm::MPI_Comm, rank::Int, nneighbors::Ptr{Int32}) =
+    @symbolcall MPI_Graph_neighbors_count(comm.x::UInt32, rank::Int, nneighbors::Ptr{Int32})::Int
+@inline MPI_Graph_neighbors(comm::MPI_Comm, rank::Int, maxneighbors::Int, neighbors::Ptr{Int32}) =
+    @symbolcall MPI_Graph_neighbors(comm.x::UInt32, rank::Int, maxneighbors::Int, neighbors::Ptr{Int32})::Int
+@inline MPI_Cart_shift(comm::MPI_Comm, direction::Int, disp::Int, rank_source::Ptr{Int32}, rank_dest::Ptr{Int32}) =
+    @symbolcall MPI_Cart_shift(comm.x::UInt32, direction::Int, disp::Int, rank_source::Ptr{Int32}, rank_dest::Ptr{Int32})::Int
+@inline MPI_Cart_sub(comm::MPI_Comm, remain_dims::Ptr{Int32}, newcomm::Ptr{MPI_Comm}) =
+    @symbolcall MPI_Cart_ub(comm.x::UInt32, remain_dims::Ptr{Int32}, newcomm::Ptr{MPI_Comm})::Int
+@inline MPI_Cart_map(comm::MPI_Comm, ndims::Int, dims::Ptr{Int32}, periods::Ptr{Int32}, newrank::Ptr{Int32}) =
+    @symbolcall MPI_Cart_map(comm.x::UInt32, ndims::Int, dims::Ptr{Int32}, periods::Ptr{Int32}, newrank::Ptr{Int32})::Int
+@inline MPI_Graph_map(comm::MPI_Comm, nnodes::Int, indx::Ptr{Int32}, edges::Ptr{Int32}, newrank::Ptr{Int32}) =
+    @symbolcall MPI_Graph_map(comm.x::UInt32, nnodes::Int, indx::Ptr{Int32}, edges::Ptr{Int32}, newrank::Ptr{Int32})::Int
+@inline MPI_Get_processor_name(name::Ptr{UInt8}, resultlen::Ptr{Int32}) =
+    @symbolcall MPI_Get_processor_name(name::Ptr{UInt8}, resultlen::Ptr{Int32})::Int
+@inline MPI_Get_version(version::Ptr{Int32}, subversion::Ptr{Int32}) =
+    @symbolcall MPI_Get_version(version::Ptr{Int32}, subversion::Ptr{Int32})::Int
+@inline MPI_Get_library_version(version::Ptr{UInt8}, resultlen::Ptr{Int32}) =
+    @symbolcall MPI_Get_library_version(version::Ptr{UInt8}, resultlen::Ptr{Int32})::Int
+@inline MPI_Errhandler_free(errhandler::Ptr{MPI_Errhandler}) =
+    @symbolcall MPI_Errhandler_free(errhandler::Ptr{MPI_Errhandler})::Int
+@inline MPI_Error_string(errorcode::Int, string::Ptr{UInt8}, resultlen::Ptr{Int32}) =
+    @symbolcall MPI_Error_string(errorcode::Int, string::Ptr{UInt8}, resultlen::Ptr{Int32})::Int
+@inline MPI_Error_class(errorcode::Int, errorclass::Ptr{Int32}) =
+    @symbolcall MPI_Error_class(errorcode::Int, errorclass::Ptr{Int32})::Int
+
 
 end # module
