@@ -90,6 +90,7 @@ using MPICH_jll
         free(A)
     end
 
+    @static if Sys.isbsd()
     let
         status = -1
         try
@@ -116,6 +117,7 @@ using MPICH_jll
 
         A = read("results.b", String)
         @test A == "0000111122223333"
+    end
     end
 
     end
