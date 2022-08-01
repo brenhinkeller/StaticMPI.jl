@@ -106,7 +106,8 @@ using MPICH_jll
         println("mpifile:")
         status = -1
         try
-            isfile("results.b") && rm("results.b")
+            isfile("results0.b") && rm("results0.b")
+            isfile("results1.b") && rm("results1.b")
             status = run(`$(MPICH_jll.PATH[])/mpiexec -np 4 ./mpifile`) # --oversubscribe option is not needed with mpich
         catch e
             @warn "Could not run ./mpifile"
@@ -115,7 +116,9 @@ using MPICH_jll
         @test isa(status, Base.Process)
         @test isa(status, Base.Process) && status.exitcode == 0
 
-        A = read("results.b", String)
+        A = read("results0.b", String)
+        @test A == "0000111122223333"
+        A = read("results1.b", String)
         @test A == "0000111122223333"
     end
     end
