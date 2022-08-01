@@ -38,8 +38,8 @@ module StaticMPI
 
     """
     ```julia
-    MPI_Init()
     MPI_Init(argc::Int, argv::Ptr{Ptr{UInt8}})
+    MPI_Init()
     ```
     Initialize the execution environment of the calling MPI task for single-
     threaded execution. The optional arguments `argc` and `argv` are the
@@ -73,7 +73,7 @@ module StaticMPI
     @inline function MPI_Comm_size(comm::Mpich.MPI_Comm) #MPICH
         comm_size = Base.RefValue(0)
         Mpich.MPI_Comm_size(comm, ⅋(comm_size))
-        return comm_size[]
+        comm_size[]
     end
     export MPI_Comm_size
 
@@ -87,13 +87,14 @@ module StaticMPI
     @inline function MPI_Comm_rank(comm::Mpich.MPI_Comm) #MPICH
         comm_rank = Base.RefValue(0)
         Mpich.MPI_Comm_rank(comm, ⅋(comm_rank))
-        return comm_rank[]
+        comm_rank[]
     end
     export MPI_Comm_rank
 
     """
     ```julia
-    function MPI_Recv(buffer::Buffer{T}, source::Int, tag::Int, comm::MPI_Comm, [status::Buffer{MPI_Status}])
+    MPI_Recv(buffer::Buffer{T}, source::Int, tag::Int, comm::MPI_Comm, status::Buffer{MPI_Status})
+    status = MPI_Recv(buffer::Buffer{T}, source::Int, tag::Int, comm::MPI_Comm)
     ```
     Receive `length(buffer)` elements of type `T` from rank `source` sent with tag
     `tag` over MPI communicator `comm`. Recived data is stored in `buffer`, with
@@ -106,6 +107,7 @@ module StaticMPI
     @inline function MPI_Recv(buffer, source, tag, comm::Mpich.MPI_Comm)
         status = Base.RefValue(MPI_STATUS_NULL)
         MPI_Recv(buffer, source, tag, comm, status)
+        status[]
     end
     @inline function MPI_Recv(buffer::Buffer{T}, source, tag, comm::Mpich.MPI_Comm, status::Buffer{Mpich.MPI_Status}) where T
         bufptr = Ptr{Nothing}(⅋(buffer))
@@ -115,7 +117,8 @@ module StaticMPI
 
     """
     ```julia
-    function MPI_Irecv(buffer::Buffer{T}, source::Int, tag::Int, comm::MPI_Comm, [request::Buffer{MPI_Request}])
+    MPI_Irecv(buffer::Buffer{T}, source::Int, tag::Int, comm::MPI_Comm, request::Buffer{MPI_Request})
+    request = MPI_Irecv(buffer::Buffer{T}, source::Int, tag::Int, comm::MPI_Comm)
     ```
     Receive `length(buffer)` elements of type `T` from rank `source` sent with tag
     `tag` over MPI communicator `comm`. Recived data is stored in `buffer`, with
@@ -132,6 +135,7 @@ module StaticMPI
     @inline function MPI_Irecv(buffer, source, tag, comm::Mpich.MPI_Comm)
         request = Base.RefValue(MPI_REQUEST_NULL)
         MPI_Irecv(buffer, source, tag, comm, request)
+        request[]
     end
     @inline function MPI_Irecv(buffer::Buffer{T}, source, tag, comm::Mpich.MPI_Comm, request::Buffer{Mpich.MPI_Request}) where T
         bufptr = Ptr{Nothing}(⅋(buffer))
@@ -141,7 +145,7 @@ module StaticMPI
 
     """
     ```julia
-    function MPI_Send(buffer::Buffer{T}, dest::Int, tag::Int, comm::MPI_Comm)
+    MPI_Send(buffer::Buffer{T}, dest::Int, tag::Int, comm::MPI_Comm)
     ```
     Send `length(buffer)` elements of type `T` to rank `source` with tag `tag`
     over MPI communicator `comm`.
@@ -161,7 +165,8 @@ module StaticMPI
 
     """
     ```julia
-    function MPI_Isend(buffer::Buffer{T}, dest::Int, tag::Int, comm::MPI_Comm, [request::Buffer{MPI_Request}])
+    MPI_Isend(buffer::Buffer{T}, dest::Int, tag::Int, comm::MPI_Comm, request::Buffer{MPI_Request})
+    request = MPI_Isend(buffer::Buffer{T}, dest::Int, tag::Int, comm::MPI_Comm)
     ```
     Send `length(buffer)` elements of type `T` to rank `source` with tag `tag`
     over MPI communicator `comm`, with resulting `MPI_Request` stored in
@@ -178,6 +183,7 @@ module StaticMPI
     @inline function MPI_Isend(buffer, dest, tag, comm::Mpich.MPI_Comm)
         request = Base.RefValue(MPI_REQUEST_NULL)
         Mpich.MPI_Isend(buffer, dest, tag, comm, request)
+        request[]
     end
     @inline function MPI_Isend(buffer::Buffer{T}, dest, tag, comm::Mpich.MPI_Comm, request::Buffer{Mpich.MPI_Request}) where T
         bufptr = Ptr{Nothing}(⅋(buffer))
@@ -201,7 +207,8 @@ module StaticMPI
 
     """
     ```julia
-    MPI_Wait(request::MPI_Request, [status::Buffer{MPI_Status}])
+    MPI_Wait(request::MPI_Request, status::Buffer{MPI_Status})
+    status = MPI_Wait(request::MPI_Request)
     ```
     Wait (i.e., do not return) until the operation corresponding to the
     `MPI_request` object `request` has been completed. The resulting `MPI_Status`
@@ -215,12 +222,14 @@ module StaticMPI
     @inline function MPI_Wait(request::Mpich.MPI_Request)
         status = Base.RefValue(MPI_STATUS_NULL)
         MPI_Wait(Base.RefValue(request), status)
+        status[]
     end
     export MPI_Wait
 
     """
     ```julia
-    MPI_Waitany(array_of_requests::Buffer{MPI_Request}, [status::Buffer{MPI_Status}])
+    MPI_Waitany(array_of_requests::Buffer{MPI_Request}, status::Buffer{MPI_Status})
+    status = MPI_Waitany(array_of_requests::Buffer{MPI_Request})
     ```
     Wait (i.e., do not return) until the at least one of the operations
     corresponding to the `MPI_request` objects in `array_of_requests``
@@ -234,6 +243,7 @@ module StaticMPI
     @inline function MPI_Waitany(requests)
         status = Base.RefValue(MPI_STATUS_NULL)
         MPI_Waitany(requests, status)
+        status[]
     end
     @inline function MPI_Waitany(requests, status)
         index = Base.RefValue(0)
@@ -281,6 +291,7 @@ module StaticMPI
     @inline function MPI_File_write_at_all(file, offset, buf)
         status = Base.RefValue(MPI_STATUS_NULL)
         MPI_File_write_at_all(file, offset, buf, status)
+        status[]
     end
     @inline function MPI_File_write_at_all(file::Mpich.MPI_File, offset::Int64, buf::Buffer{T}, status::Buffer{Mpich.MPI_Status}) where T
         bufptr = Ptr{Nothing}(⅋(buf))
