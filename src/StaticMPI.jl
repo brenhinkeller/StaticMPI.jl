@@ -356,4 +356,73 @@ module StaticMPI
     end
     export MPI_File_iwrite_at
 
+
+    @inline function MPI_File_read(file, buf)
+        status = Base.RefValue(MPI_STATUS_NULL)
+        MPI_File_read(file, buf, status)
+        status[]
+    end
+    @inline function MPI_File_read(file::Mpich.MPI_File, buf::Buffer{T}, status::Buffer{Mpich.MPI_Status}) where T
+        bufptr = Ptr{Nothing}(⅋(buf))
+        Mpich.MPI_File_read(file, bufptr, length(buf), Mpich.mpitype(T), ⅋(status))
+    end
+    export MPI_File_read
+
+    @inline function MPI_File_read_all(file, buf)
+        status = Base.RefValue(MPI_STATUS_NULL)
+        MPI_File_read_all(file, buf, status)
+        status[]
+    end
+    @inline function MPI_File_read_all(file::Mpich.MPI_File, buf::Buffer{T}, status::Buffer{Mpich.MPI_Status}) where T
+        bufptr = Ptr{Nothing}(⅋(buf))
+        Mpich.MPI_File_read_all(file, bufptr, length(buf), Mpich.mpitype(T), ⅋(status))
+    end
+    export MPI_File_read_all
+
+    @inline function MPI_File_write(file, buf)
+        status = Base.RefValue(MPI_STATUS_NULL)
+        MPI_File_read_all(file, buf, status)
+        status[]
+    end
+    @inline function MPI_File_write(file::Mpich.MPI_File, buf::Buffer{T}, status::Buffer{Mpich.MPI_Status}) where T
+        bufptr = Ptr{Nothing}(⅋(buf))
+        Mpich.MPI_File_write(file, bufptr, length(buf), Mpich.mpitype(T), ⅋(status))
+    end
+    export MPI_File_write
+
+    @inline function MPI_File_write_all(file, buf)
+        status = Base.RefValue(MPI_STATUS_NULL)
+        MPI_File_write_all(file, buf, status)
+        status[]
+    end
+    @inline function MPI_File_write_all(file::Mpich.MPI_File, buf::Buffer{T}, status::Buffer{Mpich.MPI_Status}) where T
+        bufptr = Ptr{Nothing}(⅋(buf))
+        Mpich.MPI_File_write_all(file, bufptr, length(buf), Mpich.mpitype(T), ⅋(status))
+    end
+    export MPI_File_write_all
+
+
+    @inline function MPI_File_iread(file, buf)
+        request = Base.RefValue(MPI_REQUEST_NULL)
+        MPI_File_iread(file, buf, request)
+        request[]
+    end
+    @inline function MPI_File_iread(file::Mpich.MPI_File, buf::Buffer{T}, request::Buffer{Mpich.MPI_Request}) where T
+        bufptr = Ptr{Nothing}(⅋(buf))
+        Mpich.MPI_File_iread(file, bufptr, length(buf), Mpich.mpitype(T), ⅋(request))
+    end
+    export MPI_File_iwrite_at
+
+    @inline function MPI_File_iwrite(file, buf)
+        request = Base.RefValue(MPI_REQUEST_NULL)
+        MPI_File_iwrite(file, buf, request)
+        request[]
+    end
+    @inline function MPI_File_iwrite(file::Mpich.MPI_File, buf::Buffer{T}, request::Buffer{Mpich.MPI_Request}) where T
+        bufptr = Ptr{Nothing}(⅋(buf))
+        Mpich.MPI_File_iwrite(file, bufptr, length(buf), Mpich.mpitype(T), ⅋(request))
+    end
+    export MPI_File_iwrite_at
+
+
 end # module
