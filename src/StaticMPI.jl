@@ -225,6 +225,13 @@ module StaticMPI
         status[]
     end
     export MPI_Wait
+    @inline MPIO_Wait(request, status::Buffer{Mpich.MPI_Status}) = Mpich.MPIO_Wait(⅋(request), ⅋(status))
+    @inline function MPIO_Wait(request::Mpich.MPI_Request)
+        status = Base.RefValue(MPI_STATUS_NULL)
+        MPIO_Wait(Base.RefValue(request), status)
+        status[]
+    end
+    export MPIO_Wait
 
     """
     ```julia
@@ -251,6 +258,18 @@ module StaticMPI
         index[]
     end
     export MPI_Waitany
+    @inline function MPIO_Waitany(requests)
+        status = Base.RefValue(MPI_STATUS_NULL)
+        MPIO_Waitany(requests, status)
+        status[]
+    end
+    @inline function MPIO_Waitany(requests, status)
+        index = Base.RefValue(0)
+        Mpich.MPIO_Waitany(length(requests), ⅋(requests), ⅋(index), ⅋(status))
+        index[]
+    end
+    export MPIO_Waitany
+
 
     """
     ```julia
@@ -272,6 +291,14 @@ module StaticMPI
     end
     @inline MPI_Waitall(requests, statuses) = Mpich.MPI_Waitall(length(requests), ⅋(requests), ⅋(statuses))
     export MPI_Waitall
+    @inline function MPIO_Waitall(requests)
+        mfill(MPI_STATUS_NULL, length(requests)) do statuses
+            rc = MPIO_Waitall(requests, statuses)
+        end
+    end
+    @inline MPIO_Waitall(requests, statuses) = Mpich.MPIO_Waitall(length(requests), ⅋(requests), ⅋(statuses))
+    export MPIO_Waitall
+
 
     # File IO
     @inline function MPI_File_open(comm, filename, amode::Int)
