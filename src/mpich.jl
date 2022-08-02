@@ -468,14 +468,14 @@ export mpitype
    @symbolcall MPI_Waitall(count::Int, array_of_requests::Ptr{MPI_Request}, array_of_statuses::Ptr{MPI_Status})::Int
 @inline MPI_Waitsome(incount::Int, array_of_requests::Ptr{MPI_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status}) =
    @symbolcall MPI_Waitsome(incount::Int, array_of_requests::Ptr{MPI_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
-@inline MPIO_Wait(request::Ptr{MPIO_Request}, status::Ptr{MPI_Status}) =
-   @symbolcall MPIO_Wait(request::Ptr{MPIO_Request}, status::Ptr{MPI_Status})::Int
-@inline MPIO_Waitany(count::Int, array_of_requests::Ptr{MPIO_Request}, index::Ptr{Int}, status::Ptr{MPI_Status}) =
-   @symbolcall MPIO_Waitany(count::Int, array_of_requests::Ptr{MPIO_Request}, index::Ptr{Int}, status::Ptr{MPI_Status})::Int
-@inline MPIO_Waitall(count::Int, array_of_requests::Ptr{MPIO_Request}, array_of_statuses::Ptr{MPI_Status}) =
-   @symbolcall MPIO_Waitall(count::Int, array_of_requests::Ptr{MPIO_Request}, array_of_statuses::Ptr{MPI_Status})::Int
-@inline MPIO_Waitsome(incount::Int, array_of_requests::Ptr{MPIO_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status}) =
-   @symbolcall MPIO_Waitsome(incount::Int, array_of_requests::Ptr{MPIO_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
+# @inline MPIO_Wait(request::Ptr{MPIO_Request}, status::Ptr{MPI_Status}) =
+#    @symbolcall MPIO_Wait(request::Ptr{MPIO_Request}, status::Ptr{MPI_Status})::Int
+# @inline MPIO_Waitany(count::Int, array_of_requests::Ptr{MPIO_Request}, index::Ptr{Int}, status::Ptr{MPI_Status}) =
+#    @symbolcall MPIO_Waitany(count::Int, array_of_requests::Ptr{MPIO_Request}, index::Ptr{Int}, status::Ptr{MPI_Status})::Int
+# @inline MPIO_Waitall(count::Int, array_of_requests::Ptr{MPIO_Request}, array_of_statuses::Ptr{MPI_Status}) =
+#    @symbolcall MPIO_Waitall(count::Int, array_of_requests::Ptr{MPIO_Request}, array_of_statuses::Ptr{MPI_Status})::Int
+# @inline MPIO_Waitsome(incount::Int, array_of_requests::Ptr{MPIO_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status}) =
+#    @symbolcall MPIO_Waitsome(incount::Int, array_of_requests::Ptr{MPIO_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
 
 # Test whether execution of a request[s] completed
 @inline MPI_Test(request::Ptr{MPI_Request}, flag::Ptr{Int}, status::Ptr{MPI_Status}) =
@@ -488,14 +488,14 @@ export mpitype
    @symbolcall MPI_Testsome(incount::Int, array_of_requests::Ptr{MPI_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
 @inline MPI_Test_cancelled(status::Ptr{MPI_Status}, flag::Ptr{Int}) =
    @symbolcall MPI_Test_cancelled(status::Ptr{MPI_Status}, flag::Ptr{Int})::Int
-@inline MPIO_Test(request::Ptr{MPIO_Request}, flag::Ptr{Int}, status::Ptr{MPI_Status}) =
-   @symbolcall MPIO_Test(request::Ptr{MPIO_Request}, flag::Ptr{Int}, status::Ptr{MPI_Status})::Int
-@inline MPIO_Testany(count::Int, array_of_requests::Ptr{MPIO_Request}, index::Ptr{Int}, flag::Ptr{Int}, status::Ptr{MPI_Status}) =
-   @symbolcall MPIO_Testany(count::Int, array_of_requests::Ptr{MPIO_Request}, index::Ptr{Int}, flag::Ptr{Int}, status::Ptr{MPI_Status})::Int
-@inline MPIO_Testall(count::Int, array_of_requests::Ptr{MPIO_Request}, flag::Ptr{Int}, array_of_statuses::Ptr{MPI_Status}) =
-   @symbolcall MPIO_Testall(count::Int, array_of_requests::Ptr{MPIO_Request}, flag::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
-@inline MPIO_Testsome(incount::Int, array_of_requests::Ptr{MPIO_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status}) =
-   @symbolcall MPIO_Testsome(incount::Int, array_of_requests::Ptr{MPIO_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
+# @inline MPIO_Test(request::Ptr{MPIO_Request}, flag::Ptr{Int}, status::Ptr{MPI_Status}) =
+#    @symbolcall MPIO_Test(request::Ptr{MPIO_Request}, flag::Ptr{Int}, status::Ptr{MPI_Status})::Int
+# @inline MPIO_Testany(count::Int, array_of_requests::Ptr{MPIO_Request}, index::Ptr{Int}, flag::Ptr{Int}, status::Ptr{MPI_Status}) =
+#    @symbolcall MPIO_Testany(count::Int, array_of_requests::Ptr{MPIO_Request}, index::Ptr{Int}, flag::Ptr{Int}, status::Ptr{MPI_Status})::Int
+# @inline MPIO_Testall(count::Int, array_of_requests::Ptr{MPIO_Request}, flag::Ptr{Int}, array_of_statuses::Ptr{MPI_Status}) =
+#    @symbolcall MPIO_Testall(count::Int, array_of_requests::Ptr{MPIO_Request}, flag::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
+# @inline MPIO_Testsome(incount::Int, array_of_requests::Ptr{MPIO_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status}) =
+#    @symbolcall MPIO_Testsome(incount::Int, array_of_requests::Ptr{MPIO_Request}, outcount::Ptr{Int}, array_of_indices::Ptr{Int}, array_of_statuses::Ptr{MPI_Status})::Int
 
 
 @inline MPI_Cancel(request::Ptr{MPI_Request}) =
