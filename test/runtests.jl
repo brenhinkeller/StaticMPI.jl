@@ -120,7 +120,7 @@ using MPICH_jll
     end
 
 
-    @static if VERSION > v"1.9.0-0" # && Sys.isbsd()
+    @static if Sys.isbsd() # VERSION > v"1.9.0-0" #
     let
         status = -1
         try
