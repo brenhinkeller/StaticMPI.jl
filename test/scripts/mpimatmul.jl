@@ -1,4 +1,5 @@
-using StaticCompiler, StaticTools, StaticMPI, MPICH_jll
+using StaticCompiler, StaticTools, MPICH_jll
+using StaticMPI
 using LoopVectorization
 libpath = joinpath(first(splitdir(MPICH_jll.PATH[])), "lib")
 

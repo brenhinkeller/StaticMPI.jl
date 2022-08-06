@@ -3,10 +3,43 @@ using StaticMPI, StaticTools
 using MPICH_jll
 
 @testset "StaticMPI.jl" begin
-
     @test MPICH_jll.is_available()
-    @static if MPICH_jll.is_available()
+
+@static if MPICH_jll.is_available()
     @test MPI_Init() == MPI_SUCCESS # Check that we have loaded libmpi
+
+    @static if Sys.isbsd() # VERSION > v"1.9.0-0" #
+    let
+        status = -1
+        try
+            isfile("mpifile") && rm("mpifile")
+            status = run(`julia --compile=min scripts/mpifile.jl`)
+        catch e
+            @warn "Could not compile ./scripts/mpifile.jl"
+            println(e)
+        end
+        @test isa(status, Base.Process)
+        @test isa(status, Base.Process) && status.exitcode == 0
+
+        println("mpifile:")
+        status = -1
+        try
+            isfile("results0.b") && rm("results0.b")
+            isfile("results1.b") && rm("results1.b")
+            status = run(`$(MPICH_jll.PATH[])/mpiexec -np 4 ./mpifile`) # --oversubscribe option is not needed with mpich
+        catch e
+            @warn "Error running ./mpifile"
+            println(e)
+        end
+        @test isa(status, Base.Process)
+        @test isa(status, Base.Process) && status.exitcode == 0
+
+        A = read("results0.b", String)
+        @test A == "0000111122223333"
+        A = read("results1.b", String)
+        @test A == "0000111122223333"
+    end
+    end
 
     let
         status = -1
@@ -30,6 +63,35 @@ using MPICH_jll
         end
         @test isa(status, Base.Process)
         @test isa(status, Base.Process) && status.exitcode == 0
+    end
+
+    let
+        status = -1
+        try
+            isfile("mpimatmul") && rm("mpimatmul")
+            status = run(`julia --compile=min scripts/mpimatmul.jl`)
+        catch e
+            @warn "Could not compile ./scripts/mpimatmul.jl"
+            println(e)
+        end
+        @test isa(status, Base.Process)
+        @test isa(status, Base.Process) && status.exitcode == 0
+
+        println("mpimatmul:")
+        status = -1
+        try
+            isfile("results.csv") && rm("results.csv")
+            status = run(`$(MPICH_jll.PATH[])/mpiexec -np 4 ./mpimatmul 5 10`) # --oversubscribe option is not needed with mpich
+        catch e
+            @warn "Error running ./mpimatmul"
+            println(e)
+        end
+        @test isa(status, Base.Process)
+        @test isa(status, Base.Process) && status.exitcode == 0
+
+        A = parsedlm(Float64, c"results.csv", ',')
+        @test A ≈ 10ones(5,5)
+        free(A)
     end
 
     let
@@ -90,68 +152,6 @@ using MPICH_jll
         free(A)
     end
 
-    let
-        status = -1
-        try
-            isfile("mpimatmul") && rm("mpimatmul")
-            status = run(`julia --compile=min scripts/mpimatmul.jl`)
-        catch e
-            @warn "Could not compile ./scripts/mpimatmul.jl"
-            println(e)
-        end
-        @test isa(status, Base.Process)
-        @test isa(status, Base.Process) && status.exitcode == 0
 
-        println("mpimatmul:")
-        status = -1
-        try
-            isfile("results.csv") && rm("results.csv")
-            status = run(`$(MPICH_jll.PATH[])/mpiexec -np 4 ./mpimatmul 5 10`) # --oversubscribe option is not needed with mpich
-        catch e
-            @warn "Error running ./mpimatmul"
-            println(e)
-        end
-        @test isa(status, Base.Process)
-        @test isa(status, Base.Process) && status.exitcode == 0
-
-        A = parsedlm(Float64, c"results.csv", ',')
-        @test A ≈ 10ones(5,5)
-        free(A)
-    end
-
-
-    @static if Sys.isbsd() # VERSION > v"1.9.0-0" #
-    let
-        status = -1
-        try
-            isfile("mpifile") && rm("mpifile")
-            status = run(`julia --compile=min scripts/mpifile.jl`)
-        catch e
-            @warn "Could not compile ./scripts/mpifile.jl"
-            println(e)
-        end
-        @test isa(status, Base.Process)
-        @test isa(status, Base.Process) && status.exitcode == 0
-
-        println("mpifile:")
-        status = -1
-        try
-            isfile("results0.b") && rm("results0.b")
-            isfile("results1.b") && rm("results1.b")
-            status = run(`$(MPICH_jll.PATH[])/mpiexec -np 4 ./mpifile`) # --oversubscribe option is not needed with mpich
-        catch e
-            @warn "Error running ./mpifile"
-            println(e)
-        end
-        @test isa(status, Base.Process)
-        @test isa(status, Base.Process) && status.exitcode == 0
-
-        A = read("results0.b", String)
-        @test A == "0000111122223333"
-        # A = read("results1.b", String)
-        # @test A == "0000111122223333"
-    end
-    end
-
-    end
+end
 end
