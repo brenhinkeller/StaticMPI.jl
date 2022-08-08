@@ -274,6 +274,44 @@ module StaticMPI
     @inline MPI_Waitall(requests, statuses) = Mpich.MPI_Waitall(length(requests)%Int32, ⅋(requests), ⅋(statuses))
     export MPI_Waitall
 
+
+    @inline function MPI_Bcast(buffer::Buffer{T}, root::Int, comm::Mpich.MPI_Comm) where T
+        bufptr = Ptr{Nothing}(⅋(buffer))
+        Mpich.MPI_Bcast(bufptr, length(buffer)%Int32, Mpich.mpitype(T), root%Int32, comm)
+    end
+    export MPI_Bcast
+
+    @inline function MPI_Scatter(sendbuf::Buffer{Tₛ}, recvbuf::Buffer{Tᵣ}, root::Int, comm::Mpich.MPI_Comm) where {Tₛ, Tᵣ}
+        sendbufptr = Ptr{Nothing}(⅋(sendbuf))
+        recvbufptr = Ptr{Nothing}(⅋(recvbuf))
+        Mpich.MPI_Scatter(sendbufptr, length(sendbuf)%Int32, Mpich.mpitype(Tₛ),
+                          recvbufptr, length(recvbuf)%Int32, Mpich.mpitype(Tᵣ), root%Int32, comm)
+    end
+    export MPI_Scatter
+
+
+    @inline function MPI_Iscatter(sendbuf, recvbuf, root, comm)
+        request = Base.RefValue(MPI_REQUEST_NULL)
+        MPI_Iscatter(sendbuf, recvbuf, root, comm, request)
+        request[]
+    end
+    @inline function MPI_Iscatter(sendbuf::Buffer{Tₛ}, recvbuf::Buffer{Tᵣ}, root::Int, comm::Mpich.MPI_Comm, request::Buffer{Mpich.MPI_Request}) where {Tₛ, Tᵣ}
+        sendbufptr = Ptr{Nothing}(⅋(sendbuf))
+        recvbufptr = Ptr{Nothing}(⅋(recvbuf))
+        Mpich.MPI_Iscatter(sendbufptr, length(sendbuf)%Int32, Mpich.mpitype(Tₛ),
+                          recvbufptr, length(recvbuf)%Int32, Mpich.mpitype(Tᵣ), root%Int32, comm, ⅋(request))
+    end
+    export MPI_Iscatter
+
+    @inline function MPI_Gather(sendbuf::Buffer{Tₛ}, recvbuf::Buffer{Tᵣ}, root::Int, comm::Mpich.MPI_Comm) where {Tₛ, Tᵣ}
+        sendbufptr = Ptr{Nothing}(⅋(sendbuf))
+        recvbufptr = Ptr{Nothing}(⅋(recvbuf))
+        Mpich.MPI_Gather(sendbufptr, length(sendbuf)%Int32, Mpich.mpitype(Tₛ),
+                         recvbufptr, length(sendbuf)%Int32, Mpich.mpitype(Tᵣ), root%Int32, comm)
+    end
+    export MPI_Gather
+
+
     # File IO
     @inline function MPI_File_open(comm, filename, amode)
         file = Base.RefValue(MPI_FILE_NULL)

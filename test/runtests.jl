@@ -9,8 +9,7 @@ using MPICH_jll
     @test MPI_Init() == MPI_SUCCESS # Check that we have loaded libmpi
 
     @static if Sys.isbsd() # VERSION > v"1.9.0-0" #
-    let
-        status = -1
+    let status = -1
         try
             isfile("mpifile") && rm("mpifile")
             status = run(`julia --compile=min scripts/mpifile.jl`)
@@ -41,8 +40,7 @@ using MPICH_jll
     end
     end
 
-    let
-        status = -1
+    let status = -1
         try
             isfile("mpihello") && rm("mpihello")
             status = run(`julia --compile=min scripts/mpihello.jl`)
@@ -65,8 +63,7 @@ using MPICH_jll
         @test isa(status, Base.Process) && status.exitcode == 0
     end
 
-    let
-        status = -1
+    let status = -1
         try
             isfile("mpimatmul") && rm("mpimatmul")
             status = run(`julia --compile=min scripts/mpimatmul.jl`)
@@ -94,8 +91,7 @@ using MPICH_jll
         free(A)
     end
 
-    let
-        status = -1
+    let status = -1
         try
             isfile("mpisendrecv") && rm("mpisendrecv")
             status = run(`julia --compile=min scripts/mpisendrecv.jl`)
@@ -123,8 +119,7 @@ using MPICH_jll
     end
 
 
-    let
-        status = -1
+    let status = -1
         try
             isfile("mpisendrecvrand") && rm("mpisendrecvrand")
             status = run(`julia --compile=min scripts/mpisendrecvrand.jl`)
@@ -149,6 +144,42 @@ using MPICH_jll
 
         A = parsedlm(Float64, c"results.csv", ',')
         @test A ≈ [-0.1075215, -2.110675, -0.6649428]
+        free(A)
+    end
+
+    let status = -1
+        try
+            isfile("scattergatherbcast") && rm("scattergatherbcast")
+            status = run(`julia --compile=min scripts/scattergatherbcast.jl`)
+        catch e
+            @warn "Could not compile ./scripts/scattergatherbcast.jl"
+            println(e)
+        end
+        @test isa(status, Base.Process)
+        @test isa(status, Base.Process) && status.exitcode == 0
+
+        println("scattergatherbcast:")
+        status = -1
+        try
+            isfile("results.csv") && rm("results.csv")
+            status = run(`$(MPICH_jll.PATH[])/mpiexec -np 4 ./scattergatherbcast`) # --oversubscribe option is not needed with mpich
+        catch e
+            @warn "Error running ./scattergatherbcast"
+            println(e)
+        end
+        @test isa(status, Base.Process)
+        @test isa(status, Base.Process) && status.exitcode == 0
+
+        for i=0:3
+            name = c"results.1.0.b"
+            name[11] += i % UInt8
+            A = read(name, MallocArray{Float64})
+            @test A == fill(10., 5)
+            free(A)
+        end
+
+        A = read(c"results.3.0.b", MallocArray{Float64})
+        @test A == fill(11., 20)
         free(A)
     end
 
