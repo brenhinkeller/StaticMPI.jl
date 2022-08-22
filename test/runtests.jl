@@ -6,13 +6,14 @@ using MPICH_jll
     @test MPICH_jll.is_available()
 
 @static if MPICH_jll.is_available()
+    jlpath = joinpath(Sys.BINDIR, Base.julia_exename()) # Get path to julia executable
     @test MPI_Init() == MPI_SUCCESS # Check that we have loaded libmpi
 
     @static if Sys.isbsd() # VERSION > v"1.9.0-0" #
     let status = -1
         try
             isfile("mpifile") && rm("mpifile")
-            status = run(`julia --compile=min scripts/mpifile.jl`)
+            status = run(`$jlpath --compile=min scripts/mpifile.jl`)
         catch e
             @warn "Could not compile ./scripts/mpifile.jl"
             println(e)
@@ -43,7 +44,7 @@ using MPICH_jll
     let status = -1
         try
             isfile("mpihello") && rm("mpihello")
-            status = run(`julia --compile=min scripts/mpihello.jl`)
+            status = run(`$jlpath --compile=min scripts/mpihello.jl`)
         catch e
             @warn "Could not compile ./scripts/mpihello.jl"
             println(e)
@@ -66,7 +67,7 @@ using MPICH_jll
     let status = -1
         try
             isfile("mpimatmul") && rm("mpimatmul")
-            status = run(`julia --compile=min scripts/mpimatmul.jl`)
+            status = run(`$jlpath --compile=min scripts/mpimatmul.jl`)
         catch e
             @warn "Could not compile ./scripts/mpimatmul.jl"
             println(e)
@@ -94,7 +95,7 @@ using MPICH_jll
     let status = -1
         try
             isfile("mpisendrecv") && rm("mpisendrecv")
-            status = run(`julia --compile=min scripts/mpisendrecv.jl`)
+            status = run(`$jlpath --compile=min scripts/mpisendrecv.jl`)
         catch e
             @warn "Could not compile ./scripts/mpisendrecv.jl"
             println(e)
@@ -122,7 +123,7 @@ using MPICH_jll
     let status = -1
         try
             isfile("mpisendrecvrand") && rm("mpisendrecvrand")
-            status = run(`julia --compile=min scripts/mpisendrecvrand.jl`)
+            status = run(`$jlpath --compile=min scripts/mpisendrecvrand.jl`)
         catch e
             @warn "Could not compile ./scripts/mpisendrecvrand.jl"
             println(e)
@@ -150,7 +151,7 @@ using MPICH_jll
     let status = -1
         try
             isfile("scattergatherbcast") && rm("scattergatherbcast")
-            status = run(`julia --compile=min scripts/scattergatherbcast.jl`)
+            status = run(`$jlpath --compile=min scripts/scattergatherbcast.jl`)
         catch e
             @warn "Could not compile ./scripts/scattergatherbcast.jl"
             println(e)
