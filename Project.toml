@@ -1,7 +1,7 @@
 name = "StaticMPI"
 uuid = "20d4277e-fd01-4864-93be-4ec87eb9404e"
 authors = ["C. Brenhin Keller"]
-version = "0.3.1"
+version = "0.3.2"
 
 [deps]
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -9,5 +9,5 @@ MPICH_jll = "7cb0a576-ebde-5e09-9194-50597f1243b4"
 StaticTools = "86c06d3c-3f03-46de-9781-57580aa96d0a"
 
 [compat]
-StaticTools = "0.7.2"
+StaticTools = "0.8"
 julia = "1.7"

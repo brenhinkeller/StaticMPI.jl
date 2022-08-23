@@ -17,7 +17,7 @@ function mpimatmul(argc, argv)
 	world_rank = MPI_Comm_rank(MPI_COMM_WORLD)
 	nworkers = world_size - 1
 
-	rows, cols = parse(Int, argv, 2), parse(Int, argv, 3)
+	rows, cols = argparse(Int, argv, 2), argparse(Int, argv, 3)
 	A, B, C = mones(rows,cols), mones(cols,rows), mzeros(rows,rows)
 	ntasks = size(A, 1)
 
