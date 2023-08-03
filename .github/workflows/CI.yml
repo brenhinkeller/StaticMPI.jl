@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.8.0-beta3'
+          - '1'
         os:
           - ubuntu-latest
           - macos-latest
