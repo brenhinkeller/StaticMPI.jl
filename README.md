@@ -5,7 +5,7 @@
 [![CI (Julia nightly)](https://github.com/brenhinkeller/StaticMPI.jl/workflows/CI%20(Julia%20nightly)/badge.svg)](https://github.com/brenhinkeller/StaticMPI.jl/actions/workflows/CI-julia-nightly.yml)
 
 
-An MPICH-compatible interface for calling [MPI](https://www.mpi-forum.org/) from
+An experimental MPICH-compatible interface for calling [MPI](https://www.mpi-forum.org/) from
 [StaticCompiler.jl](https://github.com/tshort/StaticCompiler.jl) `compile_executable`'d
 standalone Julia executables, building upon the [StaticTools.jl](https://github.com/brenhinkeller/StaticTools.jl) approach.
 
